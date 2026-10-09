@@ -26,7 +26,9 @@
     .main-content { flex: 1; margin-left: 260px; padding: 20px; transition: margin-left 0.3s; }
     .top-bar { background: #fff; padding: 15px 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
     .top-bar h1 { font-size: 20px; color: #0d1f12; }
-    .btn-out { background: #b8493b; color: #fff; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    .top-actions { display: flex; gap: 10px; }
+    .btn-out { background: #b8493b; color: #fff; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; text-decoration: none; display: inline-block; }
+    .btn-web { background: #4caf8a; color: #fff; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; text-decoration: none; display: inline-block; }
     .hamburger { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: #0d1f12; }
 
     /* STATS */
@@ -72,18 +74,19 @@
       .sidebar.open { transform: translateX(0); }
       .main-content { margin-left: 0; padding: 15px; }
       .hamburger { display: block; }
-      .top-bar { padding: 10px 15px; }
+      .top-bar { padding: 10px 15px; flex-wrap: wrap; gap: 10px; }
       .top-bar h1 { font-size: 18px; }
+      .top-actions { width: 100%; justify-content: space-between; }
+      .btn-out, .btn-web { flex: 1; text-align: center; }
       
       .stats-grid { grid-template-columns: 1fr 1fr; gap: 15px; }
       .stat-card { padding: 15px; flex-direction: row; }
       .stat-info h3 { font-size: 22px; }
       .stat-icon { width: 40px; height: 40px; font-size: 16px; }
       
-      /* Convert Tables to Cards on Mobile */
       .table-card { padding: 15px; }
       table { min-width: 100%; }
-      thead { display: none; /* Hide headers on mobile */ }
+      thead { display: none; }
       tbody, tr, td { display: block; width: 100%; }
       tr { margin-bottom: 15px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
       td { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; padding: 8px 0; text-align: right; }
@@ -132,7 +135,10 @@
       <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
       <h1 id="pageHeader">Dashboard</h1>
     </div>
-    <button class="btn-out" onclick="logout()">Logout</button>
+    <div class="top-actions">
+      <a href="index.html" class="btn-web"><i class="fas fa-globe"></i> View Website</a>
+      <button class="btn-out" onclick="logout()">Logout</button>
+    </div>
   </div>
 
   <!-- DASHBOARD -->
@@ -221,8 +227,6 @@
 </div>
 
 <script>
-  let charts = {};
-
   async function login() {
     const res = await fetch('/api/admin/login', {
       method: 'POST',
@@ -255,7 +259,7 @@
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     el.classList.add('active');
     document.getElementById('pageHeader').innerText = id.charAt(0).toUpperCase() + id.slice(1);
-    if (window.innerWidth <= 768) toggleSidebar(); // Close sidebar on mobile after click
+    if (window.innerWidth <= 768) toggleSidebar();
     
     if (id === 'dashboard') loadDashboard();
     if (id === 'properties') loadProperties();
