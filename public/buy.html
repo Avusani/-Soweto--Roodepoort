@@ -106,6 +106,12 @@
   propertyTypes.forEach(t => typeSelect.innerHTML += `<option value="${t}">${t}</option>`);
 
   let allProps = [];
+  let adminSettings = {};
+
+  async function loadSettings() {
+    const res = await fetch('/api/settings');
+    adminSettings = await res.json();
+  }
 
   function updateSuburbs() {
     const r = document.getElementById('fRegion').value;
@@ -121,10 +127,10 @@
 
   async function loadProps() {
     try {
+      await loadSettings();
       const res = await fetch('/api/properties?type=Sale'); 
       allProps = await res.json();
       
-      // Read URL params from homepage search
       const params = new URLSearchParams(window.location.search);
       if (params.get('region')) document.getElementById('fRegion').value = params.get('region');
       updateSuburbs();
@@ -233,6 +239,10 @@
       </div>
     `).join('');
 
+    const isPaid = p.feePlan && p.feePlan !== 'None' && p.feePlan !== '';
+    const waNum = isPaid ? p.whatsapp : adminSettings.whatsapp;
+    const btnText = isPaid ? 'Contact Landlord / Seller' : 'Contact Admin to Enquire';
+
     document.getElementById('detailBody').innerHTML = `
       <div class="gallery-main">${mainHtml}</div>
       <div class="gallery-thumbs">${thumbsHtml}</div>
@@ -254,8 +264,8 @@
 
       <div class="detail-desc">${p.description || 'No description provided.'}</div>
       
-      <a href="https://wa.me/27${p.whatsapp}" target="_blank" class="btn-contact">
-        <i class="fab fa-whatsapp"></i> Contact Landlord / Seller
+      <a href="https://wa.me/27${waNum}" target="_blank" class="btn-contact">
+        <i class="fab fa-whatsapp"></i> ${btnText}
       </a>
     `;
   }
