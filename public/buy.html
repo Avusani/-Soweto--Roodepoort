@@ -50,6 +50,29 @@
     .detail-desc { background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; }
     .btn-contact { display: block; text-align: center; padding: 15px; background: #4caf8a; color: #fff; border-radius: 8px; font-weight: 700; font-size: 16px; text-decoration: none; }
 
+    /* WHATSAPP ALERTS */
+    .alert-box { margin-top: 40px; }
+    .alert-card { background: #fff; border: 1px solid #cfe8dc; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 25px; display: grid; grid-template-columns: 1fr 1.4fr; gap: 30px; }
+    .alert-intro h3 { font-size: 20px; color: #0d1f12; margin-bottom: 10px; }
+    .alert-intro h3 i { color: #25d366; }
+    .alert-intro p { font-size: 14px; color: #555; margin-bottom: 12px; }
+    .alert-intro ul { list-style: none; font-size: 14px; color: #333; }
+    .alert-intro li { margin-bottom: 6px; }
+    .alert-intro li i { color: #4caf8a; margin-right: 6px; }
+    .alert-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .alert-form label { font-size: 13px; font-weight: 500; color: #333; display: flex; flex-direction: column; gap: 5px; }
+    .alert-form input, .alert-form select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Poppins'; font-size: 14px; }
+    .alert-form .alert-consent { grid-column: 1 / -1; flex-direction: row; align-items: flex-start; gap: 8px; font-weight: 400; color: #555; }
+    .alert-form .alert-consent input { margin-top: 3px; }
+    .alert-form button { grid-column: 1 / -1; padding: 12px; background: #25d366; color: #fff; border: none; border-radius: 6px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: 'Poppins'; }
+    .alert-form button:disabled { opacity: 0.6; }
+    .alert-msg { grid-column: 1 / -1; font-size: 14px; }
+    .alert-msg.ok { color: #155724; }
+    .alert-msg.err { color: #b8493b; }
+    @media (max-width: 768px) {
+      .alert-card { grid-template-columns: 1fr; padding: 18px; gap: 18px; }
+      .alert-form { grid-template-columns: 1fr; }
+    }
     @media (max-width: 768px) {
       .filters { grid-template-columns: 1fr 1fr; }
       .property-grid { grid-template-columns: 1fr; }
@@ -86,6 +109,7 @@
   <div class="property-grid" id="grid">
     <p class="empty">Loading properties...</p>
   </div>
+  <div class="alert-box" id="alertSignup"></div>
 </div>
 
 <div class="modal-overlay" id="detailModal">
@@ -95,6 +119,7 @@
   </div>
 </div>
 
+<script src="alerts.js"></script>
 <script>
   const suburbs = {
     Soweto: ["Armadale", "Braamfischerville", "Chiawelo", "Comptonville", "Devland", "Dhlamini", "Diepkloof", "Dobsonville", "Dobsonville Gardens", "Doornkop", "Dube", "Emdeni", "Freedom Park", "Jabavu", "Jabulani", "Klipspruit", "Klipspruit West", "Kliptown", "Lenaron", "Lougherin", "Mapetla", "Meadowlands", "Meredale", "Mofolo Central", "Mofolo North", "Mofolo South", "Molapo", "Moletsane", "Moroka", "Moroka North", "Naledi", "Naturena", "Noordgesig", "Orlando East", "Orlando Ekhaya", "Orlando West", "Phiri", "Pimville", "Power Park", "Protea City", "Protea Glen", "Protea North", "Protea South", "Rivasdale", "Rockville", "Senaoane", "Slovoville", "Stesa", "Tladi", "Zola", "Zondi"],
@@ -103,9 +128,11 @@
   const propertyTypes = ["Backroom", "Outside room", "Room to rent", "Shared room", "Bachelor", "Bachelor flat", "Bedsitter", "Studio", "Granny flat", "Cottage", "Garden cottage", "1-bedroom flat", "2-bedroom flat", "3-bedroom flat", "Duplex", "Townhouse", "Cluster home", "House (2, 3, 4+ bedrooms)", "Matchbox house", "RDP house", "Hostel room", "Student room", "Loft", "Penthouse"];
 
   const typeSelect = document.getElementById('fType');
+  typeSelect.innerHTML = '<option value="">All Types</option>';
   propertyTypes.forEach(t => typeSelect.innerHTML += `<option value="${t}">${t}</option>`);
 
   let allProps = [];
+  const alertSignup = mountAlertSignup(document.getElementById('alertSignup'), { type: 'Sale', suburbs, propertyTypes });
   let adminSettings = {};
 
   async function loadSettings() {
@@ -140,6 +167,14 @@
       if (params.get('parking')) document.getElementById('fParking').value = params.get('parking');
       
       renderGrid();
+
+      const linked = params.get('listing') && allProps.find(p => String(p.id) === params.get('listing'));
+      if (linked) {
+        currentProp = linked;
+        currentImgIndex = 0;
+        document.getElementById('detailModal').classList.add('show');
+        renderDetails();
+      }
     } catch (err) {
       document.getElementById('grid').innerHTML = '<p class="empty">Error loading properties.</p>';
     }
@@ -151,6 +186,7 @@
     const fTyp = document.getElementById('fType').value;
     const fBud = document.getElementById('fBudget').value;
     const fPar = document.getElementById('fParking').value;
+    alertSignup.syncFrom({ region: fReg, suburb: fSub, propType: fTyp, maxPrice: fBud });
 
     let filtered = allProps.filter(p => {
       if (fReg && p.region !== fReg) return false;
@@ -164,7 +200,7 @@
 
     const grid = document.getElementById('grid');
     if (filtered.length === 0) {
-      grid.innerHTML = '<p class="empty">No properties found. Try adjusting filters.</p>';
+      grid.innerHTML = '<p class="empty">No properties found. Try adjusting filters, or get a WhatsApp alert below when one is listed.</p>';
       return;
     }
 
@@ -264,7 +300,7 @@
 
       <div class="detail-desc">${p.description || 'No description provided.'}</div>
       
-      <a href="https://wa.me/27${waNum}" target="_blank" class="btn-contact">
+      <a href="${waLink(waNum)}" target="_blank" class="btn-contact">
         <i class="fab fa-whatsapp"></i> ${btnText}
       </a>
     `;

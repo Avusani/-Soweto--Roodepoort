@@ -189,6 +189,7 @@
   </div>
 </div>
 
+<script src="alerts.js"></script>
 <script>
   let allProps = [];
   let siteContent = {};
@@ -320,7 +321,7 @@
 
       <div class="detail-desc">${p.description || 'No description provided.'}</div>
       
-      <a href="https://wa.me/27${waNum}" target="_blank" class="btn-contact">
+      <a href="${waLink(waNum)}" target="_blank" class="btn-contact">
         <i class="fab fa-whatsapp"></i> ${btnText}
       </a>
     `;
@@ -350,7 +351,7 @@
       body.innerText = siteContent.privacy || 'No content available.';
     } else if (type === 'contact') {
       title.innerText = 'Contact Us';
-      body.innerHTML = `WhatsApp: <a href="https://wa.me/27${siteContent.whatsapp}" target="_blank" style="color:#4caf8a;">${siteContent.whatsapp}</a><br><br>Email: <a href="mailto:${siteContent.email}" style="color:#4caf8a;">${siteContent.email}</a>`;
+      body.innerHTML = `WhatsApp: <a href="${waLink(siteContent.whatsapp)}" target="_blank" style="color:#4caf8a;">${siteContent.whatsapp}</a><br><br>Email: <a href="mailto:${siteContent.email}" style="color:#4caf8a;">${siteContent.email}</a>`;
     }
     
     modal.classList.add('show');
