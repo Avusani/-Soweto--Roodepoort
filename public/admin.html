@@ -66,11 +66,32 @@
     
     .overlay-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; }
 
+    /* MOBILE RESPONSIVENESS */
     @media (max-width: 768px) {
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); }
       .main-content { margin-left: 0; padding: 15px; }
       .hamburger { display: block; }
+      .top-bar { padding: 10px 15px; }
+      .top-bar h1 { font-size: 18px; }
+      
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 15px; }
+      .stat-card { padding: 15px; flex-direction: row; }
+      .stat-info h3 { font-size: 22px; }
+      .stat-icon { width: 40px; height: 40px; font-size: 16px; }
+      
+      /* Convert Tables to Cards on Mobile */
+      .table-card { padding: 15px; }
+      table { min-width: 100%; }
+      thead { display: none; /* Hide headers on mobile */ }
+      tbody, tr, td { display: block; width: 100%; }
+      tr { margin-bottom: 15px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+      td { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; padding: 8px 0; text-align: right; }
+      td::before { content: attr(data-label); font-weight: 600; color: #333; margin-right: 10px; text-align: left; }
+      td:last-child { border-bottom: none; }
+      
+      .btn-sm { width: 100%; margin-bottom: 5px; text-align: center; }
+      .sel-fee { width: 100%; margin-bottom: 5px; }
     }
   </style>
 </head>
@@ -258,10 +279,10 @@
     
     document.getElementById('pendingTableBody').innerHTML = pending.map(p => `
       <tr>
-        <td>${p.title}</td>
-        <td>${p.type}</td>
-        <td>R${p.price}</td>
-        <td>
+        <td data-label="Title">${p.title}</td>
+        <td data-label="Type">${p.type}</td>
+        <td data-label="Price">R${p.price}</td>
+        <td data-label="Fee Plan">
           <select class="sel-fee" onchange="setFeePlan(${p.id}, this.value)">
             <option value="">Select Fee...</option>
             <option value="Once-off (R50)" ${p.feePlan === 'Once-off (R50)' ? 'selected' : ''}>Once-off (R50)</option>
@@ -270,13 +291,13 @@
             <option value="Premium Membership" ${p.feePlan === 'Premium Membership' ? 'selected' : ''}>Premium (R250/m)</option>
           </select>
         </td>
-        <td><span class="status-badge status-pending">${p.status}</span></td>
-        <td>
+        <td data-label="Status"><span class="status-badge status-pending">${p.status}</span></td>
+        <td data-label="Actions">
           <button class="btn-sm btn-appr" onclick="updateProp(${p.id}, 'Approved')">Approve</button>
           <button class="btn-sm btn-dec" onclick="updateProp(${p.id}, 'Declined')">Decline</button>
         </td>
       </tr>
-    `).join('') || '<tr><td colspan="6">No pending properties</td></tr>';
+    `).join('') || '<tr><td colspan="6" style="text-align:center;">No pending properties</td></tr>';
   }
 
   async function loadProperties() {
@@ -284,18 +305,18 @@
     const props = await res.json();
     document.getElementById('allTableBody').innerHTML = props.map(p => `
       <tr>
-        <td>${p.title}</td>
-        <td>${p.suburb}</td>
-        <td>${p.type}</td>
-        <td>R${p.price}</td>
-        <td><span class="status-badge status-${p.status.toLowerCase().replace(/\s/g, '')}">${p.status}</span></td>
-        <td>
+        <td data-label="Title">${p.title}</td>
+        <td data-label="Location">${p.suburb}</td>
+        <td data-label="Type">${p.type}</td>
+        <td data-label="Price">R${p.price}</td>
+        <td data-label="Status"><span class="status-badge status-${p.status.toLowerCase().replace(/\s/g, '')}">${p.status}</span></td>
+        <td data-label="Actions">
           ${p.status === 'Approved' ? `<button class="btn-sm btn-repost" onclick="updateProp(${p.id}, 'Taken')">Mark Taken</button>` : ''}
           ${p.status === 'Taken' || p.status === 'Declined' ? `<button class="btn-sm btn-repost" onclick="updateProp(${p.id}, 'Approved')">Repost</button>` : ''}
           <button class="btn-sm btn-del" onclick="deleteProp(${p.id})">Delete</button>
         </td>
       </tr>
-    `).join('') || '<tr><td colspan="6">No properties found</td></tr>';
+    `).join('') || '<tr><td colspan="6" style="text-align:center;">No properties found</td></tr>';
   }
 
   async function loadContent() {
