@@ -50,9 +50,20 @@
     .detail-desc { background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; }
     .btn-contact { display: block; text-align: center; padding: 15px; background: #4caf8a; color: #fff; border-radius: 8px; font-weight: 700; font-size: 16px; text-decoration: none; }
 
+    /* FIX: 2x2 Grid on Mobile */
     @media (max-width: 768px) {
       .filters { grid-template-columns: 1fr 1fr; }
-      .property-grid { grid-template-columns: 1fr; }
+      .property-grid { 
+        grid-template-columns: repeat(2, 1fr); /* 2 columns side-by-side */
+        gap: 15px; 
+      }
+      .img-box { height: 120px; }
+      .property-card .body { padding: 10px; }
+      .property-card .price { font-size: 16px; font-weight: 700; }
+      .property-card .title { font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+      .property-card .details-row { gap: 8px; font-size: 12px; margin-bottom: 8px; }
+      .property-card .addr { font-size: 11px; padding-top: 8px; }
+
       .gallery-main { height: 250px; }
       .modal { padding: 15px; }
     }
