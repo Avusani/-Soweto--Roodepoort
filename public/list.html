@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Post Your Property</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Poppins', sans-serif; background: #f0f2f5; color: #333; }
+    .header { background: #0d1f12; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+    .header h1 { font-size: 18px; }
+    .header a { color: #fff; text-decoration: none; font-size: 14px; background: #4caf8a; padding: 8px 15px; border-radius: 20px; }
+    .container { max-width: 600px; margin: 20px auto; padding: 0 15px; padding-bottom: 50px; }
+    .card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    .toggle { display: flex; background: #e0e0e0; border-radius: 8px; padding: 5px; margin-bottom: 20px; }
+    .toggle button { flex: 1; padding: 10px; border: none; background: transparent; font-weight: 600; cursor: pointer; border-radius: 6px; }
+    .toggle button.active { background: #0d1f12; color: #fff; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: 500; font-size: 14px; margin-bottom: 5px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; font-family: 'Poppins'; }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .btn-submit { width: 100%; padding: 15px; background: #4caf8a; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; }
+    .file-info { font-size: 12px; color: #666; margin-top: 5px; }
+    @media (max-width: 500px) { .form-grid-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <h1>Post Property</h1>
+  <a href="index.html">Back Home</a>
+</header>
+
+<div class="container">
+  <div class="card">
+    <div class="toggle">
+      <button type="button" id="btn-rent" class="active" onclick="setType('rent')">🟢 Rent Out</button>
+      <button type="button" id="btn-sale" onclick="setType('sale')">🔵 Sell</button>
+    </div>
+
+    <form id="propertyForm" enctype="multipart/form-data">
+      <div class="form-group">
+        <label>Property Title *</label>
+        <input type="text" name="title" placeholder="e.g. Bachelor room in Protea Glen" required>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label>Region *</label>
+          <select name="region" id="regionSelect" required onchange="updateSuburbs()">
+            <option value="">Select...</option>
+            <option value="Soweto">Soweto</option>
+            <option value="Roodepoort">Roodepoort</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Suburb *</label>
+          <select name="suburb" id="suburbSelect" required>
+            <option value="">Select Region First...</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Street Address (Optional but recommended)</label>
+        <input type="text" name="streetAddress" placeholder="123 Main Street">
+      </div>
+
+      <div class="form-group">
+        <label>Property Type *</label>
+        <select name="propType" id="propTypeSelect" required></select>
+      </div>
+
+      <div id="rentFields">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Monthly Rent (R) *</label>
+            <input type="number" name="price" placeholder="3000" required>
+          </div>
+          <div class="form-group">
+            <label>Deposit (R)</label>
+            <input type="number" name="deposit" placeholder="1000">
+          </div>
+        </div>
+      </div>
+
+      <div id="saleFields" style="display:none;">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Sale Price (R) *</label>
+            <input type="number" name="salePrice" placeholder="850000">
+          </div>
+          <div class="form-group">
+            <label>Erf Size (m²)</label>
+            <input type="text" name="erf" placeholder="350">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label>Bedrooms *</label>
+          <select name="beds" required>
+            <option>1</option><option>2</option><option>3</option><option>4+</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Bathrooms *</label>
+          <select name="baths" required>
+            <option>1</option><option>2</option><option>3+</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label>Parking</label>
+          <select name="parking">
+            <option>1</option><option>2</option><option>No Parking</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Available From *</label>
+          <input type="date" name="availableDate" required>
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label>Pet Friendly?</label>
+          <select name="petFriendly">
+            <option value="No">No</option><option value="Yes">Yes</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Child Friendly?</label>
+          <select name="childFriendly">
+            <option value="Yes">Yes</option><option value="No">No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label>Your Name *</label>
+          <input type="text" name="name" placeholder="John Doe" required>
+        </div>
+        <div class="form-group">
+          <label>WhatsApp Number *</label>
+          <input type="text" name="whatsapp" placeholder="0685353186" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea name="description" rows="3" placeholder="Tell us about the property..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Upload Pictures (Up to 10) *</label>
+        <input type="file" name="images" accept="image/*" capture="environment" multiple required>
+        <div class="file-info">You can take photos directly with your phone or select from gallery.</div>
+      </div>
+
+      <div class="form-group">
+        <label>Upload Video Walkthrough (Optional)</label>
+        <input type="file" name="video" accept="video/*" capture="environment">
+      </div>
+
+      <button type="submit" class="btn-submit">✅ Submit for Approval</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  const suburbs = {
+    Soweto: ["Armadale", "Chiawelo", "Comptonville", "Devland", "Dhlamini", "Diepkloof", "Dobsonville", "Doornkop", "Dube", "Emdeni", "Jabavu", "Jabulani", "Klipspruit", "Lenaron", "Lougherin", "Mapetla", "Meadowlands", "Meredale", "Mofolo", "Molapo", "Moletsane", "Moroka", "Naledi", "Naturena", "Noordgesig", "Orlando", "Phiri", "Pimville", "Power Park", "Protea City", "Protea Glen", "Protea North", "Protea South", "Braamfischerville", "Rockville", "Rivasdale", "Senaoane", "Slovoville", "Stesa", "Tladi", "Zola", "Zondi"],
+    Roodepoort: ["Allen’s Nek", "Amorosa", "Bergbron", "Constantia Kloof", "Constantia Park", "Cosmo City", "Delarey", "Discovery", "Droogeheuwel", "Durban Deep", "Eagle Canyon", "Floracliffe", "Fleurhof", "Florida", "Florida Glen", "Florida Hills", "Florida Lake", "Florida Park", "Georginia", "Groblerpark", "Hamberg", "Helderkruin", "Honeydew", "Honeydew Grove", "Honeydew Manor", "Honeydew Ridge", "Horison", "Horison View", "Kloofendal", "Laser Park", "Lindhaven", "Little Falls", "Maraisburg", "Matholesville", "Ontdekkers Park", "Poortview", "Princess", "Quellerina", "Radiokop", "Roodekrans", "Roodepoort Central", "Roodepoort North", "Roodepoort West", "Ruimsig", "Strubens Valley", "Weltevreden Park", "Wilgeheuwel", "Willowbrook", "Wilro Park", "Witpoortjie", "Zandspruit"]
+  };
+
+  const propertyTypes = ["Backroom", "Outside room", "Room to rent", "Shared room", "Bachelor", "Bachelor flat", "Bedsitter", "Studio", "Granny flat", "Cottage", "Garden cottage", "1-bedroom flat", "2-bedroom flat", "3-bedroom flat", "Duplex", "Townhouse", "Cluster home", "House (2, 3, 4+ bedrooms)", "Matchbox house", "RDP house", "Hostel room", "Student room", "Loft", "Penthouse"];
+
+  const propTypeSelect = document.getElementById('propTypeSelect');
+  propertyTypes.forEach(t => propTypeSelect.innerHTML += `<option value="${t}">${t}</option>`);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('type') === 'sale') setType('sale');
+
+  function setType(type) {
+    document.getElementById('btn-rent').classList.remove('active');
+    document.getElementById('btn-sale').classList.remove('active');
+    document.getElementById('btn-' + type).classList.add('active');
+    
+    if (type === 'rent') {
+      document.getElementById('rentFields').style.display = 'block';
+      document.getElementById('saleFields').style.display = 'none';
+      document.querySelector('input[name="price"]').setAttribute('required', 'true');
+      document.querySelector('input[name="salePrice"]').removeAttribute('required');
+    } else {
+      document.getElementById('rentFields').style.display = 'none';
+      document.getElementById('saleFields').style.display = 'block';
+      document.querySelector('input[name="price"]').removeAttribute('required');
+      document.querySelector('input[name="salePrice"]').setAttribute('required', 'true');
+    }
+  }
+
+  function updateSuburbs() {
+    const r = document.getElementById('regionSelect').value;
+    const s = document.getElementById('suburbSelect');
+    s.innerHTML = '<option value="">Select Suburb...</option>';
+    if (r && suburbs[r]) suburbs[r].forEach(sub => s.innerHTML += `<option>${sub}</option>`));
+  }
+
+  document.getElementById('propertyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const isRent = document.getElementById('btn-rent').classList.contains('active');
+    
+    if (isRent) {
+      formData.delete('salePrice');
+      formData.delete('erf');
+    } else {
+      formData.delete('price');
+      formData.delete('deposit');
+      formData.set('price', formData.get('salePrice'));
+      formData.delete('salePrice');
+    }
+    
+    formData.append('type', isRent ? 'Rent' : 'Sale');
+
+    try {
+      const res = await fetch('/api/properties', { method: 'POST', body: formData });
+      if (res.ok) {
+        alert('Property submitted successfully! Pending Admin approval.');
+        window.location.href = 'index.html';
+      } else {
+        alert('Error submitting property.');
+      }
+    } catch (err) {
+      alert('Network error.');
+    }
+  });
+</script>
+</body>
+</html>
