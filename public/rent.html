@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Properties for Rent</title> <!-- Change to Sale for buy.html -->
+  <title>Properties for Rent</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -14,7 +14,7 @@
     .header a { color: #fff; text-decoration: none; font-size: 14px; background: #4caf8a; padding: 8px 15px; border-radius: 20px; }
     .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
     
-    .filters { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .filters { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
     .filters select, .filters input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Poppins'; width: 100%; }
     
     .property-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
@@ -32,7 +32,6 @@
     .addr { font-size: 14px; color: #666; border-top: 1px solid #eee; padding-top: 10px; }
     .empty { text-align: center; color: #666; padding: 40px; }
 
-    /* MODAL */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
     .modal-overlay.show { display: flex; }
     .modal { background: #fff; border-radius: 8px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; padding: 30px; }
@@ -62,7 +61,7 @@
 <body>
 
 <header class="header">
-  <h1>Properties for Rent</h1> <!-- Change to Sale for buy.html -->
+  <h1>Properties for Rent</h1>
   <a href="index.html">Back Home</a>
 </header>
 
@@ -76,6 +75,12 @@
     <select id="fSuburb"><option value="">All Suburbs</option></select>
     <select id="fType"></select>
     <input type="number" id="fBudget" placeholder="Max Budget (R)">
+    <select id="fParking">
+      <option value="">Any Parking</option>
+      <option value="1">1+ Parking</option>
+      <option value="2">2+ Parking</option>
+      <option value="No Parking">No Parking</option>
+    </select>
   </div>
 
   <div class="property-grid" id="grid">
@@ -83,7 +88,6 @@
   </div>
 </div>
 
-<!-- PROPERTY DETAIL MODAL -->
 <div class="modal-overlay" id="detailModal">
   <div class="modal">
     <button class="close-btn" onclick="closeDetails()">✕</button>
@@ -93,8 +97,8 @@
 
 <script>
   const suburbs = {
-    Soweto: ["Armadale", "Chiawelo", "Comptonville", "Devland", "Dhlamini", "Diepkloof", "Dobsonville", "Doornkop", "Dube", "Emdeni", "Jabavu", "Jabulani", "Klipspruit", "Lenaron", "Lougherin", "Mapetla", "Meadowlands", "Meredale", "Mofolo", "Molapo", "Moletsane", "Moroka", "Naledi", "Naturena", "Noordgesig", "Orlando", "Phiri", "Pimville", "Power Park", "Protea City", "Protea Glen", "Protea North", "Protea South", "Braamfischerville", "Rockville", "Rivasdale", "Senaoane", "Slovoville", "Stesa", "Tladi", "Zola", "Zondi"],
-    Roodepoort: ["Allen’s Nek", "Amorosa", "Bergbron", "Constantia Kloof", "Constantia Park", "Cosmo City", "Delarey", "Discovery", "Droogeheuwel", "Durban Deep", "Eagle Canyon", "Floracliffe", "Fleurhof", "Florida", "Florida Glen", "Florida Hills", "Florida Lake", "Florida Park", "Georginia", "Groblerpark", "Hamberg", "Helderkruin", "Honeydew", "Honeydew Grove", "Honeydew Manor", "Honeydew Ridge", "Horison", "Horison View", "Kloofendal", "Laser Park", "Lindhaven", "Little Falls", "Maraisburg", "Matholesville", "Ontdekkers Park", "Poortview", "Princess", "Quellerina", "Radiokop", "Roodekrans", "Roodepoort Central", "Roodepoort North", "Roodepoort West", "Ruimsig", "Strubens Valley", "Weltevreden Park", "Wilgeheuwel", "Willowbrook", "Wilro Park", "Witpoortjie", "Zandspruit"]
+    Soweto: ["Armadale", "Braamfischerville", "Chiawelo", "Comptonville", "Devland", "Dhlamini", "Diepkloof", "Dobsonville", "Dobsonville Gardens", "Doornkop", "Dube", "Emdeni", "Freedom Park", "Jabavu", "Jabulani", "Klipspruit", "Klipspruit West", "Kliptown", "Lenaron", "Lougherin", "Mapetla", "Meadowlands", "Meredale", "Mofolo Central", "Mofolo North", "Mofolo South", "Molapo", "Moletsane", "Moroka", "Moroka North", "Naledi", "Naturena", "Noordgesig", "Orlando East", "Orlando Ekhaya", "Orlando West", "Phiri", "Pimville", "Power Park", "Protea City", "Protea Glen", "Protea North", "Protea South", "Rivasdale", "Rockville", "Senaoane", "Slovoville", "Stesa", "Tladi", "Zola", "Zondi"],
+    Roodepoort: ["Allen’s Nek", "Amorosa", "Bergbron", "Constantia Kloof", "Constantia Park", "Cosmo City", "Delarey", "Discovery", "Droogeheuwel", "Durban Deep", "Eagle Canyon", "Fleurhof", "Floracliffe", "Florida", "Florida Glen", "Florida Hills", "Florida Lake", "Florida Park", "Georginia", "Groblerpark", "Hamberg", "Helderkruin", "Honeydew", "Honeydew Grove", "Honeydew Manor", "Honeydew Ridge", "Horison", "Horison View", "Kloofendal", "Laser Park", "Lindhaven", "Little Falls", "Maraisburg", "Matholesville", "Ontdekkers Park", "Poortview", "Princess", "Quellerina", "Radiokop", "Roodekrans", "Roodepoort Central", "Roodepoort North", "Roodepoort West", "Ruimsig", "Strubens Valley", "Weltevreden Park", "Wilgeheuwel", "Willowbrook", "Wilro Park", "Witpoortjie", "Zandspruit"]
   };
   const propertyTypes = ["Backroom", "Outside room", "Room to rent", "Shared room", "Bachelor", "Bachelor flat", "Bedsitter", "Studio", "Granny flat", "Cottage", "Garden cottage", "1-bedroom flat", "2-bedroom flat", "3-bedroom flat", "Duplex", "Townhouse", "Cluster home", "House (2, 3, 4+ bedrooms)", "Matchbox house", "RDP house", "Hostel room", "Student room", "Loft", "Penthouse"];
 
@@ -107,14 +111,28 @@
     const r = document.getElementById('fRegion').value;
     const s = document.getElementById('fSuburb');
     s.innerHTML = '<option value="">All Suburbs</option>';
-    if (r && suburbs[r]) suburbs[r].forEach(sub => s.innerHTML += `<option>${sub}</option>`));
+    if (r && suburbs[r]) {
+      suburbs[r].forEach(sub => {
+        s.innerHTML += `<option value="${sub}">${sub}</option>`;
+      });
+    }
+    renderGrid();
   }
 
   async function loadProps() {
     try {
-      // Change 'Rent' to 'Sale' in buy.html
       const res = await fetch('/api/properties?type=Rent'); 
       allProps = await res.json();
+      
+      // Read URL params from homepage search
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('region')) document.getElementById('fRegion').value = params.get('region');
+      updateSuburbs(); // Trigger populating suburbs based on region
+      if (params.get('suburb')) document.getElementById('fSuburb').value = params.get('suburb');
+      if (params.get('type')) document.getElementById('fType').value = params.get('type');
+      if (params.get('budget')) document.getElementById('fBudget').value = params.get('budget');
+      if (params.get('parking')) document.getElementById('fParking').value = params.get('parking');
+      
       renderGrid();
     } catch (err) {
       document.getElementById('grid').innerHTML = '<p class="empty">Error loading properties.</p>';
@@ -126,12 +144,15 @@
     const fSub = document.getElementById('fSuburb').value;
     const fTyp = document.getElementById('fType').value;
     const fBud = document.getElementById('fBudget').value;
+    const fPar = document.getElementById('fParking').value;
 
     let filtered = allProps.filter(p => {
       if (fReg && p.region !== fReg) return false;
       if (fSub && p.suburb !== fSub) return false;
       if (fTyp && p.propType !== fTyp) return false;
       if (fBud && parseInt(p.price) > parseInt(fBud)) return false;
+      if (fPar === 'No Parking' && p.parking !== 'No Parking') return false;
+      if (fPar && fPar !== 'No Parking' && parseInt(p.parking) < parseInt(fPar)) return false;
       return true;
     });
 
@@ -148,18 +169,20 @@
           ${p.availableDate ? `<div class="badge">AVAIL: ${formatDate(p.availableDate)}</div>` : ''}
         </div>
         <div class="body">
-          <div class="price">R ${p.price} ${p.type === 'Rent' ? '<span style="font-size:14px;color:#666;font-weight:400;">/ month</span>' : ''}</div>
+          <div class="price">R ${p.price} <span style="font-size:14px;color:#666;font-weight:400;">/ month</span></div>
           <div class="title">${p.suburb} ${p.beds} Bedroom ${p.propType}</div>
           <div class="details-row">
             <span><i class="fas fa-bed"></i> ${p.beds}</span>
             <span><i class="fas fa-bath"></i> ${p.baths}</span>
-            <span><i class="fas fa-car"></i> ${p.parking}</span>
+            <span><i class="fas fa-car"></i> ${p.parking || 'No'} Parking</span>
             ${p.erf ? `<span><i class="fas fa-vector-square"></i> ${p.erf} m²</span>` : ''}
           </div>
           <div class="addr"><i class="fas fa-map-marker-alt"></i> ${p.streetAddress || p.suburb}, ${p.region}</div>
         </div>
       </div>
     `).join('');
+    
+    window.filteredProps = filtered;
   }
 
   function formatDate(dateStr) {
@@ -168,23 +191,11 @@
     return d.toLocaleDateString('en-ZA', { day: '2-digit', month: 'short' }).toUpperCase();
   }
 
-  // GALLERY LOGIC
   let currentProp = null;
   let currentImgIndex = 0;
 
   function openDetails(index) {
-    currentProp = allProps.filter(p => {
-      const fReg = document.getElementById('fRegion').value;
-      const fSub = document.getElementById('fSuburb').value;
-      const fTyp = document.getElementById('fType').value;
-      const fBud = document.getElementById('fBudget').value;
-      if (fReg && p.region !== fReg) return false;
-      if (fSub && p.suburb !== fSub) return false;
-      if (fTyp && p.propType !== fTyp) return false;
-      if (fBud && parseInt(p.price) > parseInt(fBud)) return false;
-      return true;
-    })[index];
-
+    currentProp = window.filteredProps[index];
     currentImgIndex = 0;
     document.getElementById('detailModal').classList.add('show');
     renderDetails();
@@ -227,7 +238,7 @@
       <div class="gallery-thumbs">${thumbsHtml}</div>
       
       <div class="detail-title">${p.title}</div>
-      <div class="detail-price">R ${p.price} ${p.type === 'Rent' ? '/ month' : ''}</div>
+      <div class="detail-price">R ${p.price} / month</div>
       
       <div class="detail-info">
         <span><i class="fas fa-bed"></i> ${p.beds} Beds</span>
@@ -255,10 +266,10 @@
     renderDetails();
   }
   
-  document.getElementById('fRegion').addEventListener('change', renderGrid);
   document.getElementById('fSuburb').addEventListener('change', renderGrid);
   document.getElementById('fType').addEventListener('change', renderGrid);
   document.getElementById('fBudget').addEventListener('input', renderGrid);
+  document.getElementById('fParking').addEventListener('change', renderGrid);
   
   loadProps();
 </script>
