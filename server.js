@@ -6,11 +6,16 @@ const multer = require('multer');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const uploadDir = path.join(__dirname, 'public', 'uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+// ===== RAILWAY VOLUME SETUP =====
+// If on Railway, use the mounted volume path, otherwise use local folders.
+const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH || __dirname;
+const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
+
+// Ensure uploads folder exists
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) { cb(null, uploadDir); },
+  destination: function (req, file, cb) { cb(null, UPLOAD_DIR); },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, uniqueSuffix + path.extname(file.originalname));
@@ -20,8 +25,10 @@ const upload = multer({ storage: storage });
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+// Serve the uploaded images from the volume
+app.use('/uploads', express.static(UPLOAD_DIR));
 
-const DB_FILE = 'db.json';
+const DB_FILE = path.join(DATA_DIR, 'db.json');
 if (!fs.existsSync(DB_FILE)) {
   fs.writeFileSync(DB_FILE, JSON.stringify({
     properties: [],
@@ -33,6 +40,7 @@ if (!fs.existsSync(DB_FILE)) {
 function readDB() { return JSON.parse(fs.readFileSync(DB_FILE)); }
 function writeDB(data) { fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2)); }
 
+// ===== API ROUTES =====
 app.get('/api/properties', (req, res) => {
   const db = readDB();
   let props = db.properties.filter(p => p.status === 'Approved');
