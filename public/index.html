@@ -282,7 +282,7 @@
       if (mainMedia.type === 'image') {
         mainHtml = `<img src="${mainMedia.src}" alt="Property Image">`;
       } else {
-        mainHtml = `<video src="${mainMedia.src}" controls autoplay></video>`;
+        mainHtml = `<video src="${mainMedia.src}" controls autoplay playsinline></video>`;
       }
     } else {
       mainHtml = `<img src="https://via.placeholder.com/800x400?text=No+Media" alt="No Media">`;
@@ -294,7 +294,6 @@
       </div>
     `).join('');
 
-    // Enquiry Routing Logic: If no fee plan is selected, route to Admin. If paid, route to Landlord.
     const isPaid = p.feePlan && p.feePlan !== 'None' && p.feePlan !== '';
     const waNum = isPaid ? p.whatsapp : siteContent.whatsapp;
     const btnText = isPaid ? 'Contact Landlord / Seller' : 'Contact Admin to Enquire';
