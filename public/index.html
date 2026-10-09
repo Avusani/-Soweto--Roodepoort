@@ -41,7 +41,6 @@
     .section-title { text-align: center; font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: #0d1f12; margin-bottom: 10px; }
     .section-subtitle { text-align: center; color: #666; font-size: 15px; margin-bottom: 30px; }
     
-    /* REMAX-STYLE PROPERTY CARDS */
     .property-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
     .property-card { background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #e0e0e0; cursor: pointer; transition: transform 0.3s; }
     .property-card:hover { transform: translateY(-5px); }
@@ -58,7 +57,6 @@
     .addr { font-size: 14px; color: #666; border-top: 1px solid #eee; padding-top: 10px; }
     .empty { text-align: center; color: #666; padding: 40px; }
 
-    /* FOOTER */
     .footer { background: #0d1f12; color: rgba(255,255,255,0.8); padding: 50px 20px 20px; }
     .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; }
     .footer h4 { color: #fff; margin-bottom: 15px; font-size: 16px; }
@@ -67,13 +65,11 @@
     .footer a:hover { color: #4caf8a; }
     .bottom { text-align: center; padding-top: 30px; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px; }
 
-    /* MODALS */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
     .modal-overlay.show { display: flex; }
     .modal { background: #fff; border-radius: 8px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; padding: 30px; }
     .modal .close-btn { position: absolute; top: 15px; right: 15px; background: #0d1f12; color: #fff; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; font-size: 16px; z-index: 10; }
     
-    /* GALLERY */
     .gallery-main { width: 100%; height: 400px; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 15px; position: relative; }
     .gallery-main img, .gallery-main video { width: 100%; height: 100%; object-fit: contain; background: #000; }
     .gallery-thumbs { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 20px; }
@@ -141,7 +137,6 @@
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer class="footer">
   <div class="footer-grid">
     <div>
@@ -170,7 +165,6 @@
   <div class="bottom">&copy; 2026 Soweto & Roodepoort Properties. All rights reserved.</div>
 </footer>
 
-<!-- RENT MODAL -->
 <div class="modal-overlay" id="rentModal" style="align-items: flex-end;">
   <div class="modal" style="max-width: 500px; border-radius: 16px 16px 0 0; text-align: center;">
     <button class="close-btn" style="background: #f0f0f0; color: #333;" onclick="closeRentModal()">✕</button>
@@ -181,7 +175,6 @@
   </div>
 </div>
 
-<!-- PROPERTY DETAIL MODAL (GALLERY) -->
 <div class="modal-overlay" id="detailModal">
   <div class="modal">
     <button class="close-btn" onclick="closeDetails()">✕</button>
@@ -190,6 +183,11 @@
 </div>
 
 <script>
+  const suburbs = {
+    Soweto: ["Armadale", "Braamfischerville", "Chiawelo", "Comptonville", "Devland", "Dhlamini", "Diepkloof", "Dobsonville", "Dobsonville Gardens", "Doornkop", "Dube", "Emdeni", "Freedom Park", "Jabavu", "Jabulani", "Klipspruit", "Klipspruit West", "Kliptown", "Lenaron", "Lougherin", "Mapetla", "Meadowlands", "Meredale", "Mofolo Central", "Mofolo North", "Mofolo South", "Molapo", "Moletsane", "Moroka", "Moroka North", "Naledi", "Naturena", "Noordgesig", "Orlando East", "Orlando Ekhaya", "Orlando West", "Phiri", "Pimville", "Power Park", "Protea City", "Protea Glen", "Protea North", "Protea South", "Rivasdale", "Rockville", "Senaoane", "Slovoville", "Stesa", "Tladi", "Zola", "Zondi"],
+    Roodepoort: ["Allen’s Nek", "Amorosa", "Bergbron", "Constantia Kloof", "Constantia Park", "Cosmo City", "Delarey", "Discovery", "Droogeheuwel", "Durban Deep", "Eagle Canyon", "Fleurhof", "Floracliffe", "Florida", "Florida Glen", "Florida Hills", "Florida Lake", "Florida Park", "Georginia", "Groblerpark", "Hamberg", "Helderkruin", "Honeydew", "Honeydew Grove", "Honeydew Manor", "Honeydew Ridge", "Horison", "Horison View", "Kloofendal", "Laser Park", "Lindhaven", "Little Falls", "Maraisburg", "Matholesville", "Ontdekkers Park", "Poortview", "Princess", "Quellerina", "Radiokop", "Roodekrans", "Roodepoort Central", "Roodepoort North", "Roodepoort West", "Ruimsig", "Strubens Valley", "Weltevreden Park", "Wilgeheuwel", "Willowbrook", "Wilro Park", "Witpoortjie", "Zandspruit"]
+  };
+
   let allProps = [];
 
   async function fetchSettings() {
@@ -215,7 +213,6 @@
         return;
       }
 
-      // Show 8 latest properties
       const featured = allProps.slice(0, 8);
 
       grid.innerHTML = featured.map((p, index) => `
@@ -248,7 +245,6 @@
     return d.toLocaleDateString('en-ZA', { day: '2-digit', month: 'short' }).toUpperCase();
   }
 
-  // GALLERY & DETAILS LOGIC
   let currentProp = null;
   let currentImgIndex = 0;
 
