@@ -253,6 +253,10 @@
       <div class="form-group"><label>Email Address</label><input type="email" id="eNum"></div>
     </div>
     <button class="btn-save" onclick="saveSettings()">Save Contact Info</button>
+    <div class="table-card" style="margin-top:20px;">
+      <h4>Email Heads-ups</h4>
+      <p id="emailStatus" style="font-size:14px; color:#555;">Checking...</p>
+    </div>
     <div class="table-card" style="margin-top:20px;" id="credsCard">
       <h4>Change Admin Login</h4>
       <div class="notice hidden" id="defaultPassNotice">You are still using the default password. Anyone who has seen this website's code knows it. Change it now.</div>
@@ -599,6 +603,11 @@
     const s = await res.json();
     document.getElementById('wNum').value = s.whatsapp;
     document.getElementById('eNum').value = s.email;
+
+    const me = await (await adminFetch('/api/admin/me')).json();
+    document.getElementById('emailStatus').innerText = me.emailNotifications
+      ? `On. An email goes to ${me.emailNotifications} when a new listing is waiting for approval and when someone signs up for a WhatsApp alert.`
+      : 'Off. To get an email when a new listing is waiting or someone signs up for an alert, set SMTP_USER (a Gmail address) and SMTP_PASS (a Gmail App Password for it) on Railway.';
   }
 
   async function setFeePlan(id, plan) {

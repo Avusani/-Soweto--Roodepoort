@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const multer = require('multer');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -88,6 +89,40 @@ function siteUrl(req) {
   return (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/+$/, '');
 }
 
+// ===== EMAIL HEADS-UP TO THE ADMIN =====
+// An email when something is waiting for the admin: a new listing to approve,
+// or a new alert sign-up. Sent through a Gmail account with an App Password
+// (SMTP_USER + SMTP_PASS on Railway), to NOTIFY_EMAIL, or else to the email
+// address in the admin's Settings. Without SMTP_USER and SMTP_PASS nothing is
+// sent and the site works as before. A failed email is logged and never stops
+// the listing or the sign-up from being saved.
+
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASS = process.env.SMTP_PASS;
+const emailOn = () => Boolean(SMTP_USER && SMTP_PASS);
+const notifyTo = () => process.env.NOTIFY_EMAIL || readDB().settings.email || SMTP_USER;
+let mailer = null;
+
+function notifyAdmin(req, subject, lines) {
+  if (!emailOn()) return;
+  if (!mailer) {
+    const port = Number(process.env.SMTP_PORT || 465);
+    mailer = nodemailer.createTransport({
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port,
+      secure: port === 465,
+      auth: { user: SMTP_USER, pass: SMTP_PASS }
+    });
+  }
+  const oneLine = s => String(s).replace(/[\r\n]+/g, ' ').trim();
+  mailer.sendMail({
+    from: `"Soweto & Roodepoort Properties" <${SMTP_USER}>`,
+    to: notifyTo(),
+    subject: oneLine(subject),
+    text: [...lines, '', `Open the admin: ${siteUrl(req)}/admin.html`].join('\n')
+  }).catch(err => console.error(`Admin email failed (${oneLine(subject)}): ${err.message}`));
+}
+
 // A small in-memory limit per client address. Enough to stop someone guessing
 // the admin password or flooding the alert sign-up from one place.
 function rateLimit(max, windowMs) {
@@ -168,7 +203,7 @@ app.post('/api/admin/login', rateLimit(10, 15 * 60 * 1000), (req, res) => {
 // Everything else under /api/admin needs a logged-in session.
 app.use('/api/admin', requireAdmin);
 
-app.get('/api/admin/me', (req, res) => res.json({ success: true }));
+app.get('/api/admin/me', (req, res) => res.json({ success: true, emailNotifications: emailOn() ? notifyTo() : null }));
 
 app.post('/api/admin/logout', (req, res) => {
   sessions.delete(readCookie(req, SESSION_COOKIE));
@@ -252,6 +287,19 @@ app.post('/api/properties', (req, res, next) => {
   db.properties.push(newProp);
   writeDB(db);
   res.json({ success: true, message: 'Property submitted for approval!' });
+
+  const price = `R${priceOf(newProp).toLocaleString('en-ZA').replace(/\s/g, ' ')}${newProp.type === 'Rent' ? ' a month' : ''}`;
+  notifyAdmin(req, `New listing to approve: ${newProp.propType || 'Property'} in ${newProp.suburb || newProp.region || 'unknown area'}`, [
+    `A new listing is waiting for your approval.`,
+    '',
+    `${newProp.type === 'Sale' ? 'For sale' : 'To rent'}: ${newProp.title || '(no title)'}`,
+    `${newProp.propType || 'Property'} in ${newProp.suburb || '-'}, ${newProp.region || '-'}`,
+    `Price: ${price}`,
+    `Photos: ${images.length}${video ? ', plus a video' : ''}`,
+    `Listed by: ${newProp.name || '(no name given)'}`,
+    '',
+    `Approve or decline it under Properties Pending Approval on the dashboard. When you approve it, anyone waiting for a place like it will pop up to be sent a WhatsApp.`
+  ]);
 });
 
 // Each listing carries how many alert subscribers it matches and has not been
@@ -366,7 +414,8 @@ app.post('/api/alerts', rateLimit(10, 60 * 60 * 1000), (req, res) => {
   if (b.consent !== true) return res.status(400).json({ success: false, field: 'consent', message: 'Tick the box to agree to receive WhatsApp alerts.' });
   if (!['Rent', 'Sale'].includes(b.type)) return res.status(400).json({ success: false, message: 'Choose rent or buy.' });
 
-  const clean = (v, max) => String(v || '').trim().slice(0, max);
+  // One line of plain text: these end up in WhatsApp messages and email subjects.
+  const clean = (v, max) => String(v || '').replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
   const alert = {
     type: b.type,
     region: ['Soweto', 'Roodepoort'].includes(b.region) ? b.region : '',
@@ -396,6 +445,18 @@ app.post('/api/alerts', rateLimit(10, 60 * 60 * 1000), (req, res) => {
   db.alerts.push(saved);
   writeDB(db);
   res.json({ success: true, message: `Done. We will WhatsApp you when a match is listed: ${describeAlert(saved)}.` });
+
+  // Listings already live that fit are worth sending now, not at the next approval.
+  const liveMatches = db.properties.filter(p => alertMatches(saved, p));
+  notifyAdmin(req, `New WhatsApp alert sign-up: ${saved.type === 'Sale' ? 'Buy' : 'Rent'}, ${describeAlert(saved)}`, [
+    `${saved.name || 'Someone'} wants to hear about new places on WhatsApp.`,
+    '',
+    `Looking to ${saved.type === 'Sale' ? 'buy' : 'rent'}: ${describeAlert(saved)}`,
+    '',
+    liveMatches.length
+      ? `${liveMatches.length} live ${liveMatches.length === 1 ? 'listing already fits' : 'listings already fit'}: ${liveMatches.slice(0, 5).map(p => `${p.propType || 'property'} in ${p.suburb}`).join('; ')}${liveMatches.length > 5 ? '; and more' : ''}. Open Property Management and tap Alerts on ${liveMatches.length === 1 ? 'it' : 'each'} to send it to them now.`
+      : `Nothing live fits yet. When you approve a listing that does, they will pop up to be sent a WhatsApp.`
+  ]);
 });
 
 // Stopping removes every alert on that number, not just the one in the link,
@@ -454,6 +515,13 @@ app.post('/api/admin/alerts/:id/sent', (req, res) => {
   a.sent = Array.from(new Set([...(a.sent || []), propertyId]));
   writeDB(db);
   res.json({ success: true });
+});
+
+// A bad request (broken JSON, for one) gets a short answer, not Express's
+// default page, which printed the server's file paths and stack trace.
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.status || 500).json({ success: false, message: err.status === 400 ? 'That request could not be read.' : 'Something went wrong. Please try again.' });
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
