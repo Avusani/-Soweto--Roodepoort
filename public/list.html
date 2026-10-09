@@ -277,7 +277,8 @@
         alert('Property submitted successfully! Pending Admin approval.');
         window.location.href = 'index.html';
       } else {
-        alert('Error submitting property.');
+        const data = await res.json().catch(() => ({}));
+        alert(data.message || 'Error submitting property.');
       }
     } catch (err) {
       alert('Network error.');

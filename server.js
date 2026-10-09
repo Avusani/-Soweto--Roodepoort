@@ -19,7 +19,8 @@ if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 // Only photos and videos. The extension decides the Content-Type the file is
 // served with, so an uploaded .html page could otherwise run as this site.
-const ALLOWED_UPLOADS = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.mp4', '.mov', '.webm', '.3gp'];
+// HEIC is what iPhones save photos as.
+const ALLOWED_UPLOADS = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.heic', '.heif', '.mp4', '.mov', '.webm', '.3gp'];
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) { cb(null, UPLOAD_DIR); },
@@ -35,7 +36,7 @@ const upload = multer({
     const ext = path.extname(file.originalname).toLowerCase();
     const okType = /^(image|video)\//.test(file.mimetype);
     if (okType && ALLOWED_UPLOADS.includes(ext)) cb(null, true);
-    else cb(new Error('Only photos (JPG, PNG, WEBP, GIF) and videos (MP4, MOV, WEBM) can be uploaded.'));
+    else cb(new Error('Only photos (JPG, PNG, HEIC, WEBP) and videos (MP4, MOV, WEBM) can be uploaded.'));
   }
 });
 
@@ -209,6 +210,8 @@ app.get('/api/properties', (req, res) => {
 
 app.post('/api/properties', (req, res, next) => {
   upload.fields([{ name: 'images', maxCount: 10 }, { name: 'video', maxCount: 1 }])(req, res, (err) => {
+    if (err && err.code === 'LIMIT_FILE_SIZE') return res.status(400).json({ success: false, message: 'Each photo or video must be smaller than 50 MB.' });
+    if (err && err.code === 'LIMIT_UNEXPECTED_FILE') return res.status(400).json({ success: false, message: 'You can upload up to 10 photos and 1 video.' });
     if (err) return res.status(400).json({ success: false, message: err.message });
     next();
   });
