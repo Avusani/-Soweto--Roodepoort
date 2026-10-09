@@ -29,7 +29,15 @@ const DB_FILE = path.join(DATA_DIR, 'db.json');
 if (!fs.existsSync(DB_FILE)) {
   fs.writeFileSync(DB_FILE, JSON.stringify({
     properties: [],
-    settings: { whatsapp: '0685353186', email: 'avukilerooms@gmail.com', logo: '' },
+    // Added Website Content fields
+    settings: { 
+      whatsapp: '0685353186', 
+      email: 'avukilerooms@gmail.com', 
+      logo: '',
+      aboutUs: 'Working hand in hand with Vusani Ikhaya Properties to make property rentals and sales easy.',
+      terms: '1. All listings must be verified. 2. No fraudulent activity allowed. 3. Fees must be paid before approval.',
+      privacy: 'We respect your privacy and do not share your personal information with third parties.'
+    },
     creds: { user: 'admin', pass: 'admin123' }
   }, null, 2));
 }
@@ -39,7 +47,7 @@ function writeDB(data) { fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2)
 
 // ===== API ROUTES =====
 
-// Get Dashboard Stats
+// Get Dashboard Stats (100% Live)
 app.get('/api/admin/stats', (req, res) => {
   const db = readDB();
   const props = db.properties;
@@ -51,9 +59,10 @@ app.get('/api/admin/stats', (req, res) => {
     rented: props.filter(p => p.status === 'Taken' && p.type === 'Rent').length,
     sold: props.filter(p => p.status === 'Taken' && p.type === 'Sale').length,
     revenue: props.reduce((sum, p) => {
-      if (p.plan === 'Once-off (R50)') return sum + 50;
-      if (p.plan === 'Premium (R200/m)') return sum + 200;
-      if (p.plan === 'Agency Service') return sum + 1500; // Example agency fee
+      if (p.feePlan === 'Once-off (R50)') return sum + 50;
+      if (p.feePlan === 'Placement Fee') return sum + 1000; // Example placement fee
+      if (p.feePlan === 'Gold Membership') return sum + 150;
+      if (p.feePlan === 'Premium Membership') return sum + 250;
       return sum;
     }, 0)
   };
@@ -75,6 +84,7 @@ app.post('/api/properties', upload.fields([{ name: 'images', maxCount: 10 }, { n
   const newProp = {
     id: Date.now(),
     status: 'Pending Approval',
+    feePlan: 'None', // Default until Admin sets it
     type: req.body.type,
     title: req.body.title,
     region: req.body.region,
@@ -96,11 +106,8 @@ app.post('/api/properties', upload.fields([{ name: 'images', maxCount: 10 }, { n
     date: new Date().toLocaleDateString()
   };
 
-  if (req.body.type === 'Rent') {
-    newProp.deposit = req.body.deposit;
-  } else {
-    newProp.erf = req.body.erf;
-  }
+  if (req.body.type === 'Rent') newProp.deposit = req.body.deposit;
+  else newProp.erf = req.body.erf;
 
   db.properties.push(newProp);
   writeDB(db);
@@ -140,10 +147,14 @@ app.post('/api/admin/upload-logo', upload.single('logo'), (req, res) => {
 
 app.get('/api/settings', (req, res) => res.json(readDB().settings));
 
+// Update Settings & Content
 app.post('/api/admin/settings', (req, res) => {
   const db = readDB();
   db.settings.whatsapp = req.body.whatsapp;
   db.settings.email = req.body.email;
+  db.settings.aboutUs = req.body.aboutUs;
+  db.settings.terms = req.body.terms;
+  db.settings.privacy = req.body.privacy;
   writeDB(db);
   res.json({ success: true });
 });
