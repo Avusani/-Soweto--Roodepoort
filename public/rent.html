@@ -227,7 +227,7 @@
       if (mainMedia.type === 'image') {
         mainHtml = `<img src="${mainMedia.src}" alt="Property Image">`;
       } else {
-        mainHtml = `<video src="${mainMedia.src}" controls autoplay></video>`;
+        mainHtml = `<video src="${mainMedia.src}" controls autoplay playsinline></video>`;
       }
     } else {
       mainHtml = `<img src="https://via.placeholder.com/800x400?text=No+Media" alt="No Media">`;
