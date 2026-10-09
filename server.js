@@ -7,11 +7,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ===== RAILWAY VOLUME SETUP =====
-// If on Railway, use the mounted volume path, otherwise use local folders.
 const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH || __dirname;
 const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
 
-// Ensure uploads folder exists
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const storage = multer.diskStorage({
@@ -25,7 +23,6 @@ const upload = multer({ storage: storage });
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-// Serve the uploaded images from the volume
 app.use('/uploads', express.static(UPLOAD_DIR));
 
 const DB_FILE = path.join(DATA_DIR, 'db.json');
@@ -41,6 +38,28 @@ function readDB() { return JSON.parse(fs.readFileSync(DB_FILE)); }
 function writeDB(data) { fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2)); }
 
 // ===== API ROUTES =====
+
+// Get Dashboard Stats
+app.get('/api/admin/stats', (req, res) => {
+  const db = readDB();
+  const props = db.properties;
+  
+  const stats = {
+    total: props.length,
+    pending: props.filter(p => p.status === 'Pending Approval').length,
+    approved: props.filter(p => p.status === 'Approved').length,
+    rented: props.filter(p => p.status === 'Taken' && p.type === 'Rent').length,
+    sold: props.filter(p => p.status === 'Taken' && p.type === 'Sale').length,
+    revenue: props.reduce((sum, p) => {
+      if (p.plan === 'Once-off (R50)') return sum + 50;
+      if (p.plan === 'Premium (R200/m)') return sum + 200;
+      if (p.plan === 'Agency Service') return sum + 1500; // Example agency fee
+      return sum;
+    }, 0)
+  };
+  res.json(stats);
+});
+
 app.get('/api/properties', (req, res) => {
   const db = readDB();
   let props = db.properties.filter(p => p.status === 'Approved');
