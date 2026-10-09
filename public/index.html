@@ -12,7 +12,8 @@
     a { text-decoration: none; color: inherit; }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-    .topbar { background: rgba(13, 31, 18, 0.95); color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+    /* TOPBAR */
+    .topbar { background: rgba(13, 31, 18, 0.95); backdrop-filter: blur(10px); color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
     .brand { display: flex; align-items: center; gap: 10px; }
     .brand img { max-height: 45px; border-radius: 5px; }
     .brand-text { display: flex; flex-direction: column; font-weight: 700; font-size: 18px; }
@@ -24,6 +25,7 @@
     .btn-nav-outline { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 10px 20px; border-radius: 20px; font-weight: 600; font-size: 14px; cursor: pointer; }
     .mobile-toggle { display: none; background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
 
+    /* HERO */
     .hero { position: relative; min-height: 80vh; background: url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat; display: flex; align-items: center; justify-content: center; text-align: center; color: #fff; padding: 80px 20px; }
     .hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(rgba(0,0,0,0.7), rgba(13,31,18,0.85)); z-index: 1; }
     .hero-content { position: relative; z-index: 2; max-width: 800px; width: 100%; }
@@ -37,6 +39,7 @@
     .btn-buy { background: #b8860b; color: #fff; }
     .btn-sell { background: #fff; color: #0d1f12; }
 
+    /* SECTIONS & PROPERTIES */
     .section { padding: 60px 20px; }
     .section-title { text-align: center; font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: #0d1f12; margin-bottom: 10px; }
     .section-subtitle { text-align: center; color: #666; font-size: 15px; margin-bottom: 30px; }
@@ -57,6 +60,7 @@
     .addr { font-size: 14px; color: #666; border-top: 1px solid #eee; padding-top: 10px; }
     .empty { text-align: center; color: #666; padding: 40px; }
 
+    /* FOOTER */
     .footer { background: #0d1f12; color: rgba(255,255,255,0.8); padding: 50px 20px 20px; }
     .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; }
     .footer h4 { color: #fff; margin-bottom: 15px; font-size: 16px; }
@@ -65,6 +69,7 @@
     .footer a:hover { color: #4caf8a; }
     .bottom { text-align: center; padding-top: 30px; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px; }
 
+    /* MODALS */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
     .modal-overlay.show { display: flex; }
     .modal { background: #fff; border-radius: 8px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; padding: 30px; }
@@ -144,15 +149,15 @@
     </div>
     <div>
       <h4>Company</h4>
-      <a href="#">About Us</a>
-      <a href="#">Contact Us</a>
+      <a href="#" onclick="openInfoModal('about')">About Us</a>
+      <a href="#" onclick="openInfoModal('contact')">Contact Us</a>
       <a href="#">Reviews</a>
       <a href="#">Report a Listing</a>
     </div>
     <div>
       <h4>Legal</h4>
-      <a href="#">Terms & Conditions</a>
-      <a href="#">Privacy Policy</a>
+      <a href="#" onclick="openInfoModal('terms')">Terms & Conditions</a>
+      <a href="#" onclick="openInfoModal('privacy')">Privacy Policy</a>
       <a href="#">Sitemap</a>
     </div>
     <div>
@@ -164,6 +169,7 @@
   <div class="bottom">&copy; 2026 Soweto & Roodepoort Properties. All rights reserved.</div>
 </footer>
 
+<!-- RENT MODAL -->
 <div class="modal-overlay" id="rentModal" style="align-items: flex-end;">
   <div class="modal" style="max-width: 500px; border-radius: 16px 16px 0 0; text-align: center;">
     <button class="close-btn" style="background: #f0f0f0; color: #333;" onclick="closeRentModal()">✕</button>
@@ -174,6 +180,7 @@
   </div>
 </div>
 
+<!-- PROPERTY DETAIL MODAL -->
 <div class="modal-overlay" id="detailModal">
   <div class="modal">
     <button class="close-btn" onclick="closeDetails()">✕</button>
@@ -181,19 +188,32 @@
   </div>
 </div>
 
-<script>
-  async function fetchSettings() {
-    const res = await fetch('/api/settings');
-    const s = await res.json();
-    if (s.logo) {
-      const img = document.getElementById('siteLogo');
-      img.src = s.logo; img.style.display = 'block';
-    }
-    document.getElementById('footerWhatsapp').innerText = s.whatsapp;
-    document.getElementById('footerEmail').innerText = s.email;
-  }
+<!-- INFO MODAL (About Us, Terms, etc) -->
+<div class="modal-overlay" id="infoModal" style="align-items: center;">
+  <div class="modal" style="max-width: 600px; border-radius: 8px;">
+    <button class="close-btn" style="background: #f0f0f0; color: #333;" onclick="closeInfoModal()">✕</button>
+    <h2 id="infoTitle" style="font-family: 'Playfair Display'; margin-bottom: 15px;">Title</h2>
+    <div id="infoBody" style="font-size: 14px; color: #555; line-height: 1.8; white-space: pre-wrap;">Loading...</div>
+  </div>
+</div>
 
+<script>
   let allProps = [];
+  let siteContent = {};
+
+  async function fetchSettings() {
+    try {
+      const res = await fetch('/api/settings');
+      const s = await res.json();
+      siteContent = s;
+      if (s.logo) {
+        const img = document.getElementById('siteLogo');
+        img.src = s.logo; img.style.display = 'block';
+      }
+      document.getElementById('footerWhatsapp').innerText = s.whatsapp;
+      document.getElementById('footerEmail').innerText = s.email;
+    } catch (err) {}
+  }
 
   async function fetchFeatured() {
     try {
@@ -229,7 +249,7 @@
         </div>
       `).join('');
     } catch (err) {
-      document.getElementById('featuredGrid').innerHTML = '<p class="empty">Error loading properties.</p>';
+      document.getElementById('featuredGrid').innerHTML = '<p class="empty">Error loading properties. Make sure server is running.</p>';
     }
   }
 
@@ -318,6 +338,33 @@
   function openRentModal() { document.getElementById('rentModal').classList.add('show'); }
   function closeRentModal() { document.getElementById('rentModal').classList.remove('show'); }
 
+  function openInfoModal(type) {
+    const modal = document.getElementById('infoModal');
+    const title = document.getElementById('infoTitle');
+    const body = document.getElementById('infoBody');
+    
+    if (type === 'about') {
+      title.innerText = 'About Us';
+      body.innerText = siteContent.aboutUs || 'No content available.';
+    } else if (type === 'terms') {
+      title.innerText = 'Terms & Conditions';
+      body.innerText = siteContent.terms || 'No content available.';
+    } else if (type === 'privacy') {
+      title.innerText = 'Privacy Policy';
+      body.innerText = siteContent.privacy || 'No content available.';
+    } else if (type === 'contact') {
+      title.innerText = 'Contact Us';
+      body.innerHTML = `WhatsApp: <a href="https://wa.me/27${siteContent.whatsapp}" target="_blank" style="color:#4caf8a;">${siteContent.whatsapp}</a><br><br>Email: <a href="mailto:${siteContent.email}" style="color:#4caf8a;">${siteContent.email}</a>`;
+    }
+    
+    modal.classList.add('show');
+  }
+
+  function closeInfoModal() {
+    document.getElementById('infoModal').classList.remove('show');
+  }
+
+  // Initialize
   fetchSettings();
   fetchFeatured();
 </script>
