@@ -82,6 +82,23 @@
     .admin-edit-form { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 20px; }
     .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 
+    /* WHATSAPP ALERTS */
+    .btn-alert { background: #25d366; }
+    .notice { background: #fff3cd; color: #856404; padding: 12px 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
+    .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; align-items: center; justify-content: center; padding: 20px; }
+    .modal-bg.show { display: flex; }
+    .modal-box { background: #fff; border-radius: 8px; width: 100%; max-width: 560px; max-height: 85vh; overflow-y: auto; padding: 25px; position: relative; }
+    .modal-box h3 { font-size: 18px; color: #0d1f12; margin-bottom: 5px; padding-right: 30px; }
+    .modal-box .sub { font-size: 13px; color: #666; margin-bottom: 15px; }
+    .modal-close { position: absolute; top: 12px; right: 12px; border: none; background: #f0f0f0; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 15px; }
+    .match-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+    .match-row:last-child { border-bottom: none; }
+    .match-row .who { font-weight: 600; color: #0d1f12; }
+    .match-row .what { color: #666; font-size: 12px; }
+    .btn-wa { background: #25d366; color: #fff; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 13px; white-space: nowrap; }
+    .sent-tag { color: #155724; font-weight: 600; font-size: 12px; white-space: nowrap; }
+
+    /* MOBILE RESPONSIVENESS */
     @media (max-width: 768px) {
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); }
@@ -117,8 +134,8 @@
   <div class="login-b">
     <h2 style="text-align:center; margin-bottom:20px;">🔐 Admin Login</h2>
     <div style="color:red; text-align:center; display:none; margin-bottom:10px;" id="err">Invalid credentials</div>
-    <input type="text" id="user" placeholder="Username" value="admin" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ccc; border-radius:4px;">
-    <input type="password" id="pass" placeholder="Password" value="admin123" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ccc; border-radius:4px;">
+    <input type="text" id="user" placeholder="Username" autocomplete="username" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ccc; border-radius:4px;">
+    <input type="password" id="pass" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter') login()" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ccc; border-radius:4px;">
     <button style="width:100%; padding:10px; background:#4caf8a; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:600;" onclick="login()">Login</button>
   </div>
 </div>
@@ -134,6 +151,7 @@
   <div class="sidebar-nav">
     <div class="nav-item active" onclick="showSection('dashboard', this)"><i class="fas fa-tachometer-alt"></i> Dashboard</div>
     <div class="nav-item" onclick="showSection('properties', this)"><i class="fas fa-building"></i> Property Management</div>
+    <div class="nav-item" onclick="showSection('alerts', this)"><i class="fab fa-whatsapp"></i> WhatsApp Alerts</div>
     <div class="nav-item" onclick="showSection('payments', this)"><i class="fas fa-money-check-alt"></i> Payments & Finance</div>
     <div class="nav-item" onclick="showSection('content', this)"><i class="fas fa-file-alt"></i> Website Content</div>
     <div class="nav-item" onclick="showSection('settings', this)"><i class="fas fa-cog"></i> Settings & Security</div>
@@ -159,6 +177,7 @@
       <div class="stat-card"><div class="stat-info"><h3 id="statPending">0</h3><p>Pending Approval</p></div><div class="stat-icon bg-orange"><i class="fas fa-clock"></i></div></div>
       <div class="stat-card"><div class="stat-info"><h3 id="statTaken">0</h3><p>Rented / Sold</p></div><div class="stat-icon bg-blue"><i class="fas fa-handshake"></i></div></div>
       <div class="stat-card"><div class="stat-info"><h3 id="statRevenue">R0</h3><p>Revenue (Fees)</p></div><div class="stat-icon bg-purple"><i class="fas fa-dollar-sign"></i></div></div>
+      <div class="stat-card"><div class="stat-info"><h3 id="statAlerts">0</h3><p>WhatsApp Alert Sign-ups</p></div><div class="stat-icon bg-green"><i class="fab fa-whatsapp"></i></div></div>
     </div>
     <div class="table-card">
       <h4>Properties Pending Approval</h4>
@@ -183,6 +202,21 @@
     </div>
   </div>
 
+  <!-- WHATSAPP ALERTS -->
+  <div id="alerts" class="content-section hidden">
+    <div class="table-card">
+      <h4>People Waiting for a WhatsApp Alert</h4>
+      <p style="color:#666; font-size:13px; margin-bottom:15px;">These people asked to be told when a place that fits their search is listed. When you approve a listing, the people it matches pop up with a ready-written WhatsApp message to send from your phone. If someone replies STOP, delete them here.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>WhatsApp</th><th>Looking For</th><th>Signed Up</th><th>Alerts Sent</th><th>Actions</th></tr></thead>
+          <tbody id="alertsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYMENTS -->
   <div id="payments" class="content-section hidden">
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-info"><h3>R50</h3><p>Once-off Advertising</p></div><div class="stat-icon bg-green"><i class="fas fa-tag"></i></div></div>
@@ -218,12 +252,15 @@
       <div class="form-group"><label>WhatsApp Number</label><input type="text" id="wNum"></div>
       <div class="form-group"><label>Email Address</label><input type="email" id="eNum"></div>
     </div>
-    <div class="table-card">
-      <h4>Admin Credentials</h4>
-      <div class="form-group"><label>New Username</label><input type="text" id="newUser"></div>
-      <div class="form-group"><label>New Password</label><input type="password" id="newPass"></div>
+    <button class="btn-save" onclick="saveSettings()">Save Contact Info</button>
+    <div class="table-card" style="margin-top:20px;" id="credsCard">
+      <h4>Change Admin Login</h4>
+      <div class="notice hidden" id="defaultPassNotice">You are still using the default password. Anyone who has seen this website's code knows it. Change it now.</div>
+      <div class="form-group"><label>Current Password</label><input type="password" id="curPass" autocomplete="current-password"></div>
+      <div class="form-group"><label>New Username</label><input type="text" id="newUser" autocomplete="username"></div>
+      <div class="form-group"><label>New Password (at least 8 characters)</label><input type="password" id="newPass" autocomplete="new-password"></div>
+      <button class="btn-save" onclick="saveCreds()">Change Login</button>
     </div>
-    <button class="btn-save" onclick="saveSettings()">Save Settings</button>
     <div class="table-card" style="margin-top:20px;">
       <h4>Upload Website Logo</h4>
       <input type="file" id="logoFile" accept="image/*" style="margin-bottom:10px;">
@@ -241,29 +278,66 @@
   </div>
 </div>
 
+<!-- WHO AN APPROVED LISTING MATCHES -->
+<div class="modal-bg" id="matchModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeMatches()">✕</button>
+    <h3 id="matchTitle">People waiting for this listing</h3>
+    <p class="sub">Tap Send to open WhatsApp on your phone with the message written. Send it, then come back for the next one.</p>
+    <div id="matchBody">Loading...</div>
+  </div>
+</div>
+
+<script src="alerts.js"></script>
 <script>
   let allAdminProps = [];
+  // Every admin call goes through here. The session lives in an HttpOnly
+  // cookie the browser sends by itself; a 401 means it ended, so log in again.
+  async function adminFetch(url, opts = {}) {
+    const res = await fetch(url, { credentials: 'same-origin', ...opts });
+    if (res.status === 401) {
+      document.getElementById('loginScreen').style.display = 'flex';
+      throw new Error('Not logged in');
+    }
+    return res;
+  }
+  window.addEventListener('unhandledrejection', e => { if (e.reason && e.reason.message === 'Not logged in') e.preventDefault(); });
+  const jsonBody = (data) => ({ headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
 
   async function login() {
     const res = await fetch('/api/admin/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user: document.getElementById('user').value, pass: document.getElementById('pass').value })
+      ...jsonBody({ user: document.getElementById('user').value, pass: document.getElementById('pass').value })
     });
     if (res.ok) {
+      const data = await res.json();
       document.getElementById('loginScreen').style.display = 'none';
-      sessionStorage.setItem('admin', 'true');
-      initDashboard();
+      document.getElementById('err').style.display = 'none';
+      document.getElementById('pass').value = '';
+      if (data.mustChangePassword) {
+        document.getElementById('defaultPassNotice').classList.remove('hidden');
+        showSection('settings', document.querySelector('.nav-item[onclick*="settings"]'));
+      } else {
+        initDashboard();
+      }
     } else {
-      document.getElementById('err').style.display = 'block';
+      const err = document.getElementById('err');
+      err.innerText = res.status === 429 ? 'Too many attempts. Wait a few minutes.' : 'Invalid credentials';
+      err.style.display = 'block';
     }
   }
-  function logout() { sessionStorage.removeItem('admin'); location.reload(); }
-
-  if (sessionStorage.getItem('admin') === 'true') {
-    document.getElementById('loginScreen').style.display = 'none';
-    initDashboard();
+  async function logout() {
+    await fetch('/api/admin/logout', { method: 'POST' });
+    location.reload();
   }
+
+  // Already logged in (the session cookie is still valid)? Skip the login screen.
+  fetch('/api/admin/me').then(res => {
+    if (res.ok) {
+      document.getElementById('loginScreen').style.display = 'none';
+      initDashboard();
+    }
+  });
 
   function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
@@ -275,11 +349,12 @@
     document.getElementById(id).classList.remove('hidden');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     el.classList.add('active');
-    document.getElementById('pageHeader').innerText = id.charAt(0).toUpperCase() + id.slice(1);
-    if (window.innerWidth <= 768) toggleSidebar();
-    
+    document.getElementById('pageHeader').innerText = el.innerText.trim();
+    if (window.innerWidth <= 768 && document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
+
     if (id === 'dashboard') loadDashboard();
     if (id === 'properties') loadProperties();
+    if (id === 'alerts') loadAlerts();
     if (id === 'content') loadContent();
     if (id === 'settings') loadSettings();
   }
@@ -287,22 +362,23 @@
   async function initDashboard() { loadDashboard(); }
 
   async function loadDashboard() {
-    const res = await fetch('/api/admin/stats');
+    const res = await adminFetch('/api/admin/stats');
     const s = await res.json();
     document.getElementById('statTotal').innerText = s.total;
     document.getElementById('statPending').innerText = s.pending;
     document.getElementById('statTaken').innerText = s.rented + s.sold;
     document.getElementById('statRevenue').innerText = 'R' + s.revenue.toLocaleString();
+    document.getElementById('statAlerts').innerText = s.alerts || 0;
 
-    const pRes = await fetch('/api/admin/properties');
+    const pRes = await adminFetch('/api/admin/properties');
     allAdminProps = await pRes.json();
     const pending = allAdminProps.filter(p => p.status === 'Pending Approval');
-    
+
     document.getElementById('pendingTableBody').innerHTML = pending.map(p => `
       <tr>
-        <td data-label="Title">${p.title}</td>
-        <td data-label="Type">${p.type}</td>
-        <td data-label="Price">R${p.price}</td>
+        <td data-label="Title">${escapeHtml(p.title)}</td>
+        <td data-label="Type">${escapeHtml(p.type)}</td>
+        <td data-label="Price">R${escapeHtml(p.price)}</td>
         <td data-label="Fee Plan">
           <select class="sel-fee" onchange="setFeePlan(${p.id}, this.value)">
             <option value="">Select Fee...</option>
@@ -312,7 +388,7 @@
             <option value="Premium Membership" ${p.feePlan === 'Premium Membership' ? 'selected' : ''}>Premium (R250/m)</option>
           </select>
         </td>
-        <td data-label="Status"><span class="status-badge status-pending">${p.status}</span></td>
+        <td data-label="Status"><span class="status-badge status-pending">${escapeHtml(p.status)}</span></td>
         <td data-label="Actions">
           <button class="btn-sm btn-view" onclick="viewAdminMedia(${p.id})"><i class="fas fa-eye"></i> View/Edit</button>
           <button class="btn-sm btn-appr" onclick="updateProp(${p.id}, 'Approved')">Approve</button>
@@ -323,17 +399,18 @@
   }
 
   async function loadProperties() {
-    const res = await fetch('/api/admin/properties');
+    const res = await adminFetch('/api/admin/properties');
     allAdminProps = await res.json();
     document.getElementById('allTableBody').innerHTML = allAdminProps.map(p => `
       <tr>
-        <td data-label="Title">${p.title}</td>
-        <td data-label="Location">${p.suburb}</td>
-        <td data-label="Type">${p.type}</td>
-        <td data-label="Price">R${p.price}</td>
-        <td data-label="Status"><span class="status-badge status-${p.status.toLowerCase().replace(/\s/g, '')}">${p.status}</span></td>
+        <td data-label="Title">${escapeHtml(p.title)}</td>
+        <td data-label="Location">${escapeHtml(p.suburb)}</td>
+        <td data-label="Type">${escapeHtml(p.type)}</td>
+        <td data-label="Price">R${escapeHtml(p.price)}</td>
+        <td data-label="Status"><span class="status-badge status-${escapeHtml(String(p.status).toLowerCase().replace(/\s/g, ''))}">${escapeHtml(p.status)}</span></td>
         <td data-label="Actions">
           <button class="btn-sm btn-view" onclick="viewAdminMedia(${p.id})"><i class="fas fa-eye"></i> View/Edit</button>
+          ${p.status === 'Approved' ? `<button class="btn-sm btn-alert" onclick="openMatches(${p.id})"><i class="fab fa-whatsapp"></i> Alerts${p.alertsWaiting ? ` (${p.alertsWaiting} waiting)` : ''}</button>` : ''}
           ${p.status === 'Approved' ? `<button class="btn-sm btn-repost" onclick="updateProp(${p.id}, 'Taken')">Mark Taken</button>` : ''}
           ${p.status === 'Taken' || p.status === 'Declined' ? `<button class="btn-sm btn-repost" onclick="updateProp(${p.id}, 'Approved')">Repost</button>` : ''}
           <button class="btn-sm btn-del" onclick="deleteProp(${p.id})">Delete</button>
@@ -392,12 +469,12 @@
         <h4 style="margin-bottom:15px;">Edit Listing Details</h4>
         <div class="form-group">
           <label>Title</label>
-          <input type="text" id="editTitle" value="${p.title}">
+          <input type="text" id="editTitle" value="${escapeHtml(p.title)}">
         </div>
         <div class="form-grid-2">
           <div class="form-group">
             <label>Price (R)</label>
-            <input type="number" id="editPrice" value="${p.price}">
+            <input type="number" id="editPrice" value="${escapeHtml(p.price)}">
           </div>
           <div class="form-group">
             <label>Status</label>
@@ -412,7 +489,7 @@
         <div class="form-grid-2">
           <div class="form-group">
             <label>Suburb</label>
-            <input type="text" id="editSuburb" value="${p.suburb}">
+            <input type="text" id="editSuburb" value="${escapeHtml(p.suburb)}">
           </div>
           <div class="form-group">
             <label>Fee Plan</label>
@@ -443,10 +520,69 @@
       suburb: document.getElementById('editSuburb').value,
       feePlan: document.getElementById('editFeePlan').value
     };
-    await fetch(`/api/admin/properties/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    const wasApproved = (allAdminProps.find(p => p.id === id) || {}).status === 'Approved';
+    await adminFetch(`/api/admin/properties/${id}`, { method: 'PUT', ...jsonBody(data) });
     alert('Property updated successfully!');
     closeAdminMedia();
     loadDashboard();
+    loadProperties();
+    if (data.status === 'Approved' && !wasApproved) openMatches(id, true);
+  }
+
+  async function loadAlerts() {
+    const res = await adminFetch('/api/admin/alerts');
+    const alerts = await res.json();
+    document.getElementById('alertsTableBody').innerHTML = alerts.map(a => `
+      <tr>
+        <td data-label="Name">${escapeHtml(a.name || '-')}</td>
+        <td data-label="WhatsApp"><a href="${waLink(a.whatsapp)}" target="_blank">+${escapeHtml(a.whatsapp)}</a></td>
+        <td data-label="Looking For">${escapeHtml(a.lookingFor)}</td>
+        <td data-label="Signed Up">${escapeHtml(new Date(a.createdAt).toLocaleDateString('en-ZA'))}</td>
+        <td data-label="Alerts Sent">${a.sentCount}</td>
+        <td data-label="Actions"><button class="btn-sm btn-del" onclick="deleteAlert(${a.id})">Delete</button></td>
+      </tr>
+    `).join('') || '<tr><td colspan="6" style="text-align:center;">Nobody has signed up for alerts yet</td></tr>';
+  }
+
+  async function deleteAlert(id) {
+    if (!confirm('Delete this person\'s alert? They will not hear about new listings.')) return;
+    await adminFetch(`/api/admin/alerts/${id}`, { method: 'DELETE' });
+    loadAlerts(); loadDashboard();
+  }
+
+  // The people a listing matches, each with a Send button that opens WhatsApp
+  // with the message already written. Tapping it marks them as sent, so they
+  // are not sent the same listing twice.
+  let matchPropertyId = null;
+  async function openMatches(id, onlyIfAny) {
+    const res = await adminFetch(`/api/admin/properties/${id}/matches`);
+    const matches = await res.json();
+    if (onlyIfAny && !matches.some(m => !m.sent)) return;
+    matchPropertyId = id;
+    document.getElementById('matchTitle').innerText = matches.length
+      ? `${matches.length} ${matches.length === 1 ? 'person is' : 'people are'} looking for a place like this`
+      : 'Nobody is waiting for a place like this yet';
+    document.getElementById('matchBody').innerHTML = matches.map(m => `
+      <div class="match-row">
+        <div>
+          <div class="who">${escapeHtml(m.name || 'No name')} · +${escapeHtml(m.whatsapp)}</div>
+          <div class="what">Wants: ${escapeHtml(m.lookingFor)}</div>
+        </div>
+        ${m.sent
+          ? `<span class="sent-tag"><i class="fas fa-check"></i> Sent</span> <a class="btn-wa" style="background:#6c757d" href="${escapeHtml(m.link)}" target="_blank">Send again</a>`
+          : `<a class="btn-wa" href="${escapeHtml(m.link)}" target="_blank" onclick="markSent(${m.alertId}, this)"><i class="fab fa-whatsapp"></i> Send</a>`}
+      </div>
+    `).join('') || '<p style="font-size:13px;color:#666;">When someone signs up for an alert that fits this listing, they will show up here.</p>';
+    document.getElementById('matchModal').classList.add('show');
+  }
+
+  async function markSent(alertId, el) {
+    el.outerHTML = '<span class="sent-tag"><i class="fas fa-check"></i> Sent</span>';
+    await adminFetch(`/api/admin/alerts/${alertId}/sent`, { method: 'POST', ...jsonBody({ propertyId: matchPropertyId }) });
+  }
+
+  function closeMatches() {
+    document.getElementById('matchModal').classList.remove('show');
     loadProperties();
   }
 
@@ -466,44 +602,57 @@
   }
 
   async function setFeePlan(id, plan) {
-    await fetch(`/api/admin/properties/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ feePlan: plan }) });
+    await adminFetch(`/api/admin/properties/${id}`, { method: 'PUT', ...jsonBody({ feePlan: plan }) });
   }
 
   async function updateProp(id, status) {
-    await fetch(`/api/admin/properties/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
+    await adminFetch(`/api/admin/properties/${id}`, { method: 'PUT', ...jsonBody({ status }) });
     loadDashboard(); loadProperties();
+    // Just went live: show who has been waiting for a place like this.
+    if (status === 'Approved') openMatches(id, true);
   }
 
   async function deleteProp(id) {
-    if(confirm('Delete permanently?')) { await fetch(`/api/admin/properties/${id}`, { method: 'DELETE' }); loadDashboard(); loadProperties(); }
+    if(confirm('Delete permanently?')) { await adminFetch(`/api/admin/properties/${id}`, { method: 'DELETE' }); loadDashboard(); loadProperties(); }
   }
 
+  // Each page saves only its own fields, so saving the content cannot wipe the
+  // WhatsApp number when the settings page was never opened.
   async function saveContent() {
     const aboutUs = document.getElementById('aboutUs').value;
     const terms = document.getElementById('terms').value;
     const privacy = document.getElementById('privacy').value;
-    const whatsapp = document.getElementById('wNum').value;
-    const email = document.getElementById('eNum').value;
-    await fetch('/api/admin/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ aboutUs, terms, privacy, whatsapp, email }) });
-    alert('Content & Settings Saved!');
+    await adminFetch('/api/admin/settings', { method: 'POST', ...jsonBody({ aboutUs, terms, privacy }) });
+    alert('Content Saved!');
   }
 
   async function saveSettings() {
     const whatsapp = document.getElementById('wNum').value;
     const email = document.getElementById('eNum').value;
-    const aboutUs = document.getElementById('aboutUs').value;
-    const terms = document.getElementById('terms').value;
-    const privacy = document.getElementById('privacy').value;
-    await fetch('/api/admin/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ whatsapp, email, aboutUs, terms, privacy }) });
-    alert('Settings Saved!');
+    await adminFetch('/api/admin/settings', { method: 'POST', ...jsonBody({ whatsapp, email }) });
+    alert('Contact Info Saved!');
+  }
+
+  async function saveCreds() {
+    const res = await adminFetch('/api/admin/creds', { method: 'POST', ...jsonBody({
+      currentPass: document.getElementById('curPass').value,
+      user: document.getElementById('newUser').value,
+      pass: document.getElementById('newPass').value
+    }) });
+    const data = await res.json();
+    if (!data.success) return alert(data.message || 'That did not work.');
+    ['curPass', 'newUser', 'newPass'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('defaultPassNotice').classList.add('hidden');
+    alert('Login changed. Use your new username and password next time.');
   }
 
   async function uploadLogo() {
     const f = document.getElementById('logoFile').files[0];
     if(!f) return alert('Select file');
     const fd = new FormData(); fd.append('logo', f);
-    await fetch('/api/admin/upload-logo', { method: 'POST', body: fd });
-    alert('Logo Uploaded!');
+    const res = await adminFetch('/api/admin/upload-logo', { method: 'POST', body: fd });
+    const data = await res.json();
+    alert(data.success ? 'Logo Uploaded!' : (data.message || 'Upload failed.'));
   }
 </script>
 </body>
