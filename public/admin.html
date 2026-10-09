@@ -54,7 +54,7 @@
     .status-declined { background: #f8d7da; color: #721c24; }
 
     .btn-sm { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; color: #fff; margin-right: 5px; margin-bottom: 5px; display: inline-block; }
-    .btn-appr { background: #4caf8a; } .btn-dec { background: #b8493b; } .btn-del { background: #6c757d; } .btn-repost { background: #2196f3; }
+    .btn-appr { background: #4caf8a; } .btn-dec { background: #b8493b; } .btn-del { background: #6c757d; } .btn-repost { background: #2196f3; } .btn-view { background: #0d1f12; }
     .sel-fee { width: 100%; padding: 6px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 5px; font-size: 12px; }
 
     .form-group { margin-bottom: 15px; }
@@ -68,7 +68,20 @@
     
     .overlay-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; }
 
-    /* MOBILE RESPONSIVENESS */
+    /* ADMIN MEDIA MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: #fff; border-radius: 8px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; padding: 30px; }
+    .modal .close-btn { position: absolute; top: 15px; right: 15px; background: #0d1f12; color: #fff; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; font-size: 16px; z-index: 10; }
+    .gallery-main { width: 100%; height: 400px; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 15px; position: relative; }
+    .gallery-main img, .gallery-main video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+    .gallery-thumbs { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 20px; }
+    .thumb { width: 80px; height: 60px; border-radius: 4px; overflow: hidden; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; }
+    .thumb.active { border-color: #4caf8a; }
+    .thumb img, .thumb video { width: 100%; height: 100%; object-fit: cover; }
+    .admin-edit-form { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 20px; }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
     @media (max-width: 768px) {
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); }
@@ -78,12 +91,10 @@
       .top-bar h1 { font-size: 18px; }
       .top-actions { width: 100%; justify-content: space-between; }
       .btn-out, .btn-web { flex: 1; text-align: center; }
-      
       .stats-grid { grid-template-columns: 1fr 1fr; gap: 15px; }
       .stat-card { padding: 15px; flex-direction: row; }
       .stat-info h3 { font-size: 22px; }
       .stat-icon { width: 40px; height: 40px; font-size: 16px; }
-      
       .table-card { padding: 15px; }
       table { min-width: 100%; }
       thead { display: none; }
@@ -92,9 +103,10 @@
       td { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; padding: 8px 0; text-align: right; }
       td::before { content: attr(data-label); font-weight: 600; color: #333; margin-right: 10px; text-align: left; }
       td:last-child { border-bottom: none; }
-      
       .btn-sm { width: 100%; margin-bottom: 5px; text-align: center; }
       .sel-fee { width: 100%; margin-bottom: 5px; }
+      .gallery-main { height: 250px; }
+      .form-grid-2 { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -141,7 +153,6 @@
     </div>
   </div>
 
-  <!-- DASHBOARD -->
   <div id="dashboard" class="content-section">
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-info"><h3 id="statTotal">0</h3><p>Total Properties</p></div><div class="stat-icon bg-green"><i class="fas fa-building"></i></div></div>
@@ -160,7 +171,6 @@
     </div>
   </div>
 
-  <!-- PROPERTIES -->
   <div id="properties" class="content-section hidden">
     <div class="table-card">
       <h4>All Property Listings</h4>
@@ -173,7 +183,6 @@
     </div>
   </div>
 
-  <!-- PAYMENTS -->
   <div id="payments" class="content-section hidden">
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-info"><h3>R50</h3><p>Once-off Advertising</p></div><div class="stat-icon bg-green"><i class="fas fa-tag"></i></div></div>
@@ -187,7 +196,6 @@
     </div>
   </div>
 
-  <!-- CONTENT -->
   <div id="content" class="content-section hidden">
     <div class="table-card">
       <h4>About Us Content</h4>
@@ -204,7 +212,6 @@
     <button class="btn-save" onclick="saveContent()">Save All Content</button>
   </div>
 
-  <!-- SETTINGS -->
   <div id="settings" class="content-section hidden">
     <div class="table-card">
       <h4>Website Contact Info</h4>
@@ -223,10 +230,20 @@
       <button class="btn-save" onclick="uploadLogo()">Upload Logo</button>
     </div>
   </div>
+</div>
 
+<!-- ADMIN VIEW & EDIT MEDIA MODAL -->
+<div class="modal-overlay" id="adminMediaModal">
+  <div class="modal">
+    <button class="close-btn" onclick="closeAdminMedia()">✕</button>
+    <h2 style="font-family:'Playfair Display'; margin-bottom: 15px;">View & Edit Property</h2>
+    <div id="adminMediaBody">Loading...</div>
+  </div>
 </div>
 
 <script>
+  let allAdminProps = [];
+
   async function login() {
     const res = await fetch('/api/admin/login', {
       method: 'POST',
@@ -278,8 +295,8 @@
     document.getElementById('statRevenue').innerText = 'R' + s.revenue.toLocaleString();
 
     const pRes = await fetch('/api/admin/properties');
-    const props = await pRes.json();
-    const pending = props.filter(p => p.status === 'Pending Approval');
+    allAdminProps = await pRes.json();
+    const pending = allAdminProps.filter(p => p.status === 'Pending Approval');
     
     document.getElementById('pendingTableBody').innerHTML = pending.map(p => `
       <tr>
@@ -297,6 +314,7 @@
         </td>
         <td data-label="Status"><span class="status-badge status-pending">${p.status}</span></td>
         <td data-label="Actions">
+          <button class="btn-sm btn-view" onclick="viewAdminMedia(${p.id})"><i class="fas fa-eye"></i> View/Edit</button>
           <button class="btn-sm btn-appr" onclick="updateProp(${p.id}, 'Approved')">Approve</button>
           <button class="btn-sm btn-dec" onclick="updateProp(${p.id}, 'Declined')">Decline</button>
         </td>
@@ -306,8 +324,8 @@
 
   async function loadProperties() {
     const res = await fetch('/api/admin/properties');
-    const props = await res.json();
-    document.getElementById('allTableBody').innerHTML = props.map(p => `
+    allAdminProps = await res.json();
+    document.getElementById('allTableBody').innerHTML = allAdminProps.map(p => `
       <tr>
         <td data-label="Title">${p.title}</td>
         <td data-label="Location">${p.suburb}</td>
@@ -315,12 +333,121 @@
         <td data-label="Price">R${p.price}</td>
         <td data-label="Status"><span class="status-badge status-${p.status.toLowerCase().replace(/\s/g, '')}">${p.status}</span></td>
         <td data-label="Actions">
+          <button class="btn-sm btn-view" onclick="viewAdminMedia(${p.id})"><i class="fas fa-eye"></i> View/Edit</button>
           ${p.status === 'Approved' ? `<button class="btn-sm btn-repost" onclick="updateProp(${p.id}, 'Taken')">Mark Taken</button>` : ''}
           ${p.status === 'Taken' || p.status === 'Declined' ? `<button class="btn-sm btn-repost" onclick="updateProp(${p.id}, 'Approved')">Repost</button>` : ''}
           <button class="btn-sm btn-del" onclick="deleteProp(${p.id})">Delete</button>
         </td>
       </tr>
     `).join('') || '<tr><td colspan="6" style="text-align:center;">No properties found</td></tr>';
+  }
+
+  let currentAdminProp = null;
+  let currentAdminImgIndex = 0;
+
+  function viewAdminMedia(id) {
+    currentAdminProp = allAdminProps.find(p => p.id === id);
+    currentAdminImgIndex = 0;
+    document.getElementById('adminMediaModal').classList.add('show');
+    renderAdminMedia();
+  }
+
+  function closeAdminMedia() {
+    document.getElementById('adminMediaModal').classList.remove('show');
+  }
+
+  function renderAdminMedia() {
+    const p = currentAdminProp;
+    const allMedia = [];
+    if (p.images && p.images.length > 0) {
+      p.images.forEach(img => allMedia.push({ type: 'image', src: img }));
+    }
+    if (p.video) {
+      allMedia.push({ type: 'video', src: p.video });
+    }
+
+    const mainMedia = allMedia[currentAdminImgIndex] || allMedia[0];
+    let mainHtml = '';
+    if (mainMedia) {
+      if (mainMedia.type === 'image') {
+        mainHtml = `<img src="${mainMedia.src}" alt="Property Image">`;
+      } else {
+        mainHtml = `<video src="${mainMedia.src}" controls autoplay playsinline></video>`;
+      }
+    } else {
+      mainHtml = `<img src="https://via.placeholder.com/800x400?text=No+Media" alt="No Media">`;
+    }
+
+    const thumbsHtml = allMedia.map((m, i) => `
+      <div class="thumb ${i === currentAdminImgIndex ? 'active' : ''}" onclick="changeAdminMedia(${i})">
+        ${m.type === 'image' ? `<img src="${m.src}">` : `<video src="${m.src}"></video>`}
+      </div>
+    `).join('');
+
+    document.getElementById('adminMediaBody').innerHTML = `
+      <div class="gallery-main">${mainHtml}</div>
+      <div class="gallery-thumbs">${thumbsHtml}</div>
+      
+      <div class="admin-edit-form">
+        <h4 style="margin-bottom:15px;">Edit Listing Details</h4>
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="editTitle" value="${p.title}">
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Price (R)</label>
+            <input type="number" id="editPrice" value="${p.price}">
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="editStatus">
+              <option value="Pending Approval" ${p.status === 'Pending Approval' ? 'selected' : ''}>Pending Approval</option>
+              <option value="Approved" ${p.status === 'Approved' ? 'selected' : ''}>Approved</option>
+              <option value="Taken" ${p.status === 'Taken' ? 'selected' : ''}>Taken</option>
+              <option value="Declined" ${p.status === 'Declined' ? 'selected' : ''}>Declined</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Suburb</label>
+            <input type="text" id="editSuburb" value="${p.suburb}">
+          </div>
+          <div class="form-group">
+            <label>Fee Plan</label>
+            <select id="editFeePlan">
+              <option value="None" ${p.feePlan === 'None' || !p.feePlan ? 'selected' : ''}>None</option>
+              <option value="Once-off (R50)" ${p.feePlan === 'Once-off (R50)' ? 'selected' : ''}>Once-off (R50)</option>
+              <option value="Placement Fee" ${p.feePlan === 'Placement Fee' ? 'selected' : ''}>Placement Fee</option>
+              <option value="Gold Membership" ${p.feePlan === 'Gold Membership' ? 'selected' : ''}>Gold (R150/m)</option>
+              <option value="Premium Membership" ${p.feePlan === 'Premium Membership' ? 'selected' : ''}>Premium (R250/m)</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-save" onclick="saveAdminEdit(${p.id})">Save Changes</button>
+      </div>
+    `;
+  }
+
+  function changeAdminMedia(index) {
+    currentAdminImgIndex = index;
+    renderAdminMedia();
+  }
+
+  async function saveAdminEdit(id) {
+    const data = {
+      title: document.getElementById('editTitle').value,
+      price: document.getElementById('editPrice').value,
+      status: document.getElementById('editStatus').value,
+      suburb: document.getElementById('editSuburb').value,
+      feePlan: document.getElementById('editFeePlan').value
+    };
+    await fetch(`/api/admin/properties/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    alert('Property updated successfully!');
+    closeAdminMedia();
+    loadDashboard();
+    loadProperties();
   }
 
   async function loadContent() {
