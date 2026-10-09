@@ -52,6 +52,7 @@ app.post('/api/properties', upload.fields([{ name: 'images', maxCount: 10 }, { n
     title: req.body.title,
     region: req.body.region,
     suburb: req.body.suburb,
+    streetAddress: req.body.streetAddress || '',
     propType: req.body.propType,
     price: req.body.price,
     beds: req.body.beds,
@@ -64,6 +65,7 @@ app.post('/api/properties', upload.fields([{ name: 'images', maxCount: 10 }, { n
     description: req.body.description,
     images: images,
     video: video,
+    availableDate: req.body.availableDate || '',
     date: new Date().toLocaleDateString()
   };
 
@@ -84,10 +86,7 @@ app.post('/api/admin/login', (req, res) => {
   else res.status(401).json({ success: false });
 });
 
-app.get('/api/admin/properties', (req, res) => {
-  const db = readDB();
-  res.json(db.properties);
-});
+app.get('/api/admin/properties', (req, res) => res.json(readDB().properties));
 
 app.put('/api/admin/properties/:id', (req, res) => {
   const db = readDB();
@@ -113,6 +112,7 @@ app.post('/api/admin/upload-logo', upload.single('logo'), (req, res) => {
 });
 
 app.get('/api/settings', (req, res) => res.json(readDB().settings));
+
 app.post('/api/admin/settings', (req, res) => {
   const db = readDB();
   db.settings.whatsapp = req.body.whatsapp;
