@@ -109,7 +109,6 @@
     <a href="index.html">Home</a>
     <a onclick="openRentModal()">Rent</a>
     <a href="buy.html">Buy</a>
-    <a href="list.html">Sell / Rent Out</a>
     <a href="admin.html" class="btn-nav-outline" style="padding: 8px 15px;">Admin</a>
   </nav>
 </header>
@@ -183,13 +182,6 @@
 </div>
 
 <script>
-  const suburbs = {
-    Soweto: ["Armadale", "Braamfischerville", "Chiawelo", "Comptonville", "Devland", "Dhlamini", "Diepkloof", "Dobsonville", "Dobsonville Gardens", "Doornkop", "Dube", "Emdeni", "Freedom Park", "Jabavu", "Jabulani", "Klipspruit", "Klipspruit West", "Kliptown", "Lenaron", "Lougherin", "Mapetla", "Meadowlands", "Meredale", "Mofolo Central", "Mofolo North", "Mofolo South", "Molapo", "Moletsane", "Moroka", "Moroka North", "Naledi", "Naturena", "Noordgesig", "Orlando East", "Orlando Ekhaya", "Orlando West", "Phiri", "Pimville", "Power Park", "Protea City", "Protea Glen", "Protea North", "Protea South", "Rivasdale", "Rockville", "Senaoane", "Slovoville", "Stesa", "Tladi", "Zola", "Zondi"],
-    Roodepoort: ["Allen’s Nek", "Amorosa", "Bergbron", "Constantia Kloof", "Constantia Park", "Cosmo City", "Delarey", "Discovery", "Droogeheuwel", "Durban Deep", "Eagle Canyon", "Fleurhof", "Floracliffe", "Florida", "Florida Glen", "Florida Hills", "Florida Lake", "Florida Park", "Georginia", "Groblerpark", "Hamberg", "Helderkruin", "Honeydew", "Honeydew Grove", "Honeydew Manor", "Honeydew Ridge", "Horison", "Horison View", "Kloofendal", "Laser Park", "Lindhaven", "Little Falls", "Maraisburg", "Matholesville", "Ontdekkers Park", "Poortview", "Princess", "Quellerina", "Radiokop", "Roodekrans", "Roodepoort Central", "Roodepoort North", "Roodepoort West", "Ruimsig", "Strubens Valley", "Weltevreden Park", "Wilgeheuwel", "Willowbrook", "Wilro Park", "Witpoortjie", "Zandspruit"]
-  };
-
-  let allProps = [];
-
   async function fetchSettings() {
     const res = await fetch('/api/settings');
     const s = await res.json();
@@ -200,6 +192,8 @@
     document.getElementById('footerWhatsapp').innerText = s.whatsapp;
     document.getElementById('footerEmail').innerText = s.email;
   }
+
+  let allProps = [];
 
   async function fetchFeatured() {
     try {
@@ -227,7 +221,7 @@
             <div class="details-row">
               <span><i class="fas fa-bed"></i> ${p.beds}</span>
               <span><i class="fas fa-bath"></i> ${p.baths}</span>
-              <span><i class="fas fa-car"></i> ${p.parking}</span>
+              <span><i class="fas fa-car"></i> ${p.parking || 'No'} Parking</span>
               ${p.erf ? `<span><i class="fas fa-vector-square"></i> ${p.erf} m²</span>` : ''}
             </div>
             <div class="addr"><i class="fas fa-map-marker-alt"></i> ${p.streetAddress || p.suburb}, ${p.region}</div>
