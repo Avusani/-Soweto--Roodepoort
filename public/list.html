@@ -21,6 +21,20 @@
     .form-group label { display: block; font-weight: 500; font-size: 14px; margin-bottom: 5px; }
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; font-family: 'Poppins', sans-serif; background: #fff; }
     .form-group input:focus, .form-group select:focus { border-color: #4caf8a; outline: none; }
+    
+    /* FIX: Proper Date Input Styling for Mobile */
+    input[type="date"] {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      min-height: 45px;
+      width: 100%;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      display: block;
+      cursor: pointer;
+    }
+
     .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
     .btn-submit { width: 100%; padding: 15px; background: #4caf8a; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
     .btn-submit:hover { background: #3a9d79; }
@@ -162,14 +176,12 @@
 
       <div class="form-group">
         <label>Upload Pictures (Up to 10) *</label>
-        <!-- Removed capture="environment" so phone asks to choose from Gallery or Camera -->
         <input type="file" name="images" accept="image/*" id="imageInput" multiple required>
         <div class="file-info">Take photos directly with your phone OR select from your gallery.</div>
       </div>
 
       <div class="form-group">
         <label>Upload Video Walkthrough (Optional)</label>
-        <!-- Removed capture="environment" so phone asks to choose from Gallery or Camera -->
         <input type="file" name="video" accept="video/*" id="videoInput">
       </div>
 
@@ -179,7 +191,6 @@
 </div>
 
 <script>
-  // Exact 51 Suburbs for Soweto and Roodepoort
   const suburbs = {
     Soweto: ["Armadale", "Braamfischerville", "Chiawelo", "Comptonville", "Devland", "Dhlamini", "Diepkloof", "Dobsonville", "Dobsonville Gardens", "Doornkop", "Dube", "Emdeni", "Freedom Park", "Jabavu", "Jabulani", "Klipspruit", "Klipspruit West", "Kliptown", "Lenaron", "Lougherin", "Mapetla", "Meadowlands", "Meredale", "Mofolo Central", "Mofolo North", "Mofolo South", "Molapo", "Moletsane", "Moroka", "Moroka North", "Naledi", "Naturena", "Noordgesig", "Orlando East", "Orlando Ekhaya", "Orlando West", "Phiri", "Pimville", "Power Park", "Protea City", "Protea Glen", "Protea North", "Protea South", "Rivasdale", "Rockville", "Senaoane", "Slovoville", "Stesa", "Tladi", "Zola", "Zondi"],
     Roodepoort: ["Allen’s Nek", "Amorosa", "Bergbron", "Constantia Kloof", "Constantia Park", "Cosmo City", "Delarey", "Discovery", "Droogeheuwel", "Durban Deep", "Eagle Canyon", "Fleurhof", "Floracliffe", "Florida", "Florida Glen", "Florida Hills", "Florida Lake", "Florida Park", "Georginia", "Groblerpark", "Hamberg", "Helderkruin", "Honeydew", "Honeydew Grove", "Honeydew Manor", "Honeydew Ridge", "Horison", "Horison View", "Kloofendal", "Laser Park", "Lindhaven", "Little Falls", "Maraisburg", "Matholesville", "Ontdekkers Park", "Poortview", "Princess", "Quellerina", "Radiokop", "Roodekrans", "Roodepoort Central", "Roodepoort North", "Roodepoort West", "Ruimsig", "Strubens Valley", "Weltevreden Park", "Wilgeheuwel", "Willowbrook", "Wilro Park", "Witpoortjie", "Zandspruit"]
@@ -187,7 +198,6 @@
 
   const propertyTypes = ["Backroom", "Outside room", "Room to rent", "Shared room", "Bachelor", "Bachelor flat", "Bedsitter", "Studio", "Granny flat", "Cottage", "Garden cottage", "1-bedroom flat", "2-bedroom flat", "3-bedroom flat", "Duplex", "Townhouse", "Cluster home", "House (2, 3, 4+ bedrooms)", "Matchbox house", "RDP house", "Hostel room", "Student room", "Loft", "Penthouse"];
 
-  // Populate Property Types
   const propTypeSelect = document.getElementById('propTypeSelect');
   propertyTypes.forEach(t => {
     let opt = document.createElement('option');
@@ -196,7 +206,6 @@
     propTypeSelect.appendChild(opt);
   });
 
-  // Check URL parameter to see if it should default to 'Sale'
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('type') === 'sale') setType('sale');
 
@@ -218,21 +227,15 @@
     }
   }
 
-  // Bulletproof function to populate suburbs instantly
   function updateSuburbs() {
     const r = document.getElementById('regionSelect').value;
     const s = document.getElementById('suburbSelect');
-    
-    // Clear existing options
     s.innerHTML = '';
-    
-    // Add default "Select Suburb" option
     const defaultOpt = document.createElement('option');
     defaultOpt.value = '';
     defaultOpt.textContent = 'Select Suburb...';
     s.appendChild(defaultOpt);
 
-    // If a region is selected, append its suburbs
     if (r && suburbs[r]) {
       suburbs[r].forEach(sub => {
         let opt = document.createElement('option');
@@ -243,32 +246,28 @@
     }
   }
 
-  // Enforce 10 image upload limit
   document.getElementById('imageInput').addEventListener('change', function() {
     if (this.files.length > 10) {
       alert('You can only upload a maximum of 10 pictures. Please select fewer files.');
-      this.value = ''; // Clear the selection
+      this.value = '';
     }
   });
 
-  // Handle Form Submission
   document.getElementById('propertyForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const isRent = document.getElementById('btn-rent').classList.contains('active');
     
-    // Clean up formData based on Rent vs Sale
     if (isRent) {
       formData.delete('salePrice');
       formData.delete('erf');
     } else {
       formData.delete('price');
       formData.delete('deposit');
-      formData.set('price', formData.get('salePrice')); // Move salePrice to standard price field
+      formData.set('price', formData.get('salePrice'));
       formData.delete('salePrice');
     }
     
-    // Append type explicitly
     formData.append('type', isRent ? 'Rent' : 'Sale');
 
     try {
