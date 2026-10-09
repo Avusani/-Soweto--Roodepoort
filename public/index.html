@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Soweto & Roodepoort Properties</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Poppins', sans-serif; background: #f8f9fa; color: #333; line-height: 1.6; overflow-x: hidden; }
+    a { text-decoration: none; color: inherit; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+    .topbar { background: rgba(13, 31, 18, 0.95); color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand img { max-height: 45px; border-radius: 5px; }
+    .brand-text { display: flex; flex-direction: column; font-weight: 700; font-size: 18px; }
+    .brand-text span { color: #4caf8a; }
+    .brand-text small { font-size: 10px; color: rgba(255,255,255,0.6); }
+    .nav-links { display: flex; gap: 15px; align-items: center; }
+    .nav-links a { color: rgba(255,255,255,0.8); font-size: 14px; cursor: pointer; }
+    .btn-nav { background: #4caf8a; color: #fff; padding: 10px 20px; border-radius: 20px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; }
+    .btn-nav-outline { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 10px 20px; border-radius: 20px; font-weight: 600; font-size: 14px; cursor: pointer; }
+    .mobile-toggle { display: none; background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
+
+    .hero { position: relative; min-height: 80vh; background: url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat; display: flex; align-items: center; justify-content: center; text-align: center; color: #fff; padding: 80px 20px; }
+    .hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(rgba(0,0,0,0.7), rgba(13,31,18,0.85)); z-index: 1; }
+    .hero-content { position: relative; z-index: 2; max-width: 800px; width: 100%; }
+    .hero h1 { font-family: 'Playfair Display', serif; font-size: 36px; margin-bottom: 15px; }
+    .hero h1 span { color: #4caf8a; }
+    .hero p { font-size: 16px; margin-bottom: 30px; }
+    
+    .action-buttons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+    .action-btn { padding: 15px 30px; border-radius: 30px; font-weight: 700; font-size: 16px; border: none; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-rent { background: #4caf8a; color: #fff; }
+    .btn-buy { background: #b8860b; color: #fff; }
+    .btn-sell { background: #fff; color: #0d1f12; }
+
+    .section { padding: 60px 20px; }
+    .section-title { text-align: center; font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: #0d1f12; margin-bottom: 10px; }
+    .section-subtitle { text-align: center; color: #666; font-size: 15px; margin-bottom: 30px; }
+    
+    /* REMAX-STYLE PROPERTY CARDS */
+    .property-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
+    .property-card { background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #e0e0e0; cursor: pointer; transition: transform 0.3s; }
+    .property-card:hover { transform: translateY(-5px); }
+    .img-box { height: 220px; background: #eee; position: relative; }
+    .img-box img { width: 100%; height: 100%; object-fit: cover; }
+    .badge { position: absolute; top: 15px; left: 15px; background: #0d1f12; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    .badge.sale { background: #b8860b; }
+    .body { padding: 20px; }
+    .price { font-size: 24px; font-weight: 800; color: #0d1f12; margin-bottom: 5px; }
+    .title { font-size: 18px; font-weight: 700; color: #0d1f12; margin-bottom: 10px; text-transform: capitalize; }
+    .details-row { display: flex; gap: 20px; margin-bottom: 15px; color: #555; font-size: 14px; }
+    .details-row span { display: flex; align-items: center; gap: 6px; }
+    .details-row i { color: #4caf8a; }
+    .addr { font-size: 14px; color: #666; border-top: 1px solid #eee; padding-top: 10px; }
+    .empty { text-align: center; color: #666; padding: 40px; }
+
+    /* FOOTER */
+    .footer { background: #0d1f12; color: rgba(255,255,255,0.8); padding: 50px 20px 20px; }
+    .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; }
+    .footer h4 { color: #fff; margin-bottom: 15px; font-size: 16px; }
+    .footer p { font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 10px; }
+    .footer a { display: block; font-size: 14px; margin-bottom: 8px; color: rgba(255,255,255,0.6); cursor: pointer; transition: color 0.2s; }
+    .footer a:hover { color: #4caf8a; }
+    .bottom { text-align: center; padding-top: 30px; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px; }
+
+    /* MODALS */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: #fff; border-radius: 8px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; padding: 30px; }
+    .modal .close-btn { position: absolute; top: 15px; right: 15px; background: #0d1f12; color: #fff; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; font-size: 16px; z-index: 10; }
+    
+    /* GALLERY */
+    .gallery-main { width: 100%; height: 400px; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 15px; position: relative; }
+    .gallery-main img, .gallery-main video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+    .gallery-thumbs { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 20px; }
+    .thumb { width: 80px; height: 60px; border-radius: 4px; overflow: hidden; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; }
+    .thumb.active { border-color: #4caf8a; }
+    .thumb img, .thumb video { width: 100%; height: 100%; object-fit: cover; }
+    .detail-title { font-size: 24px; font-weight: 700; margin-bottom: 5px; }
+    .detail-price { font-size: 22px; color: #4caf8a; font-weight: 700; margin-bottom: 15px; }
+    .detail-info { display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; }
+    .detail-info span { font-size: 15px; display: flex; align-items: center; gap: 6px; }
+    .detail-desc { background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; }
+    .btn-contact { display: block; text-align: center; padding: 15px; background: #4caf8a; color: #fff; border-radius: 8px; font-weight: 700; font-size: 16px; text-decoration: none; }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; position: absolute; top: 60px; left: 0; right: 0; background: #0d1f12; flex-direction: column; padding: 20px; gap: 15px; }
+      .nav-links.open { display: flex; }
+      .mobile-toggle { display: block; }
+      .hero h1 { font-size: 28px; }
+      .property-grid { grid-template-columns: 1fr; }
+      .gallery-main { height: 250px; }
+      .modal { padding: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <img id="siteLogo" src="" alt="Logo" style="display:none;">
+    <div class="brand-text">
+      Soweto & <span>Roodepoort</span>
+      <small>Working with VUSANI IKHAYA PROPERTIES</small>
+    </div>
+  </div>
+  <button class="mobile-toggle" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
+  <nav class="nav-links" id="navLinks">
+    <a href="index.html">Home</a>
+    <a onclick="openRentModal()">Rent</a>
+    <a href="buy.html">Buy</a>
+    <a href="list.html">Sell / Rent Out</a>
+    <a href="admin.html" class="btn-nav-outline" style="padding: 8px 15px;">Admin</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="hero-content">
+    <h1>Find Your Next Home in <span>Soweto & Roodepoort</span></h1>
+    <p>Browse hundreds of verified rooms, apartments, and houses available for rent and sale.</p>
+    
+    <div class="action-buttons">
+      <button class="action-btn btn-rent" onclick="openRentModal()"><i class="fas fa-key"></i> Rent</button>
+      <a href="buy.html" class="action-btn btn-buy"><i class="fas fa-home"></i> Buy</a>
+      <a href="list.html" class="action-btn btn-sell"><i class="fas fa-tag"></i> Sell / Rent Out</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Featured Properties</h2>
+    <p class="section-subtitle">Handpicked rooms and apartments available right now.</p>
+    <div class="property-grid" id="featuredGrid">
+      <p class="empty">Loading properties...</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <h4>🏠 Soweto & Roodepoort</h4>
+      <p>Working hand in hand with VUSANI IKHAYA PROPERTIES to make property rentals and sales easy. Trusted by thousands of tenants and landlords.</p>
+    </div>
+    <div>
+      <h4>Company</h4>
+      <a href="#">About Us</a>
+      <a href="#">Contact Us</a>
+      <a href="#">Reviews</a>
+      <a href="#">Report a Listing</a>
+    </div>
+    <div>
+      <h4>Legal</h4>
+      <a href="#">Terms & Conditions</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Sitemap</a>
+    </div>
+    <div>
+      <h4>Contact Info</h4>
+      <p><i class="fas fa-phone"></i> <span id="footerWhatsapp">0685353186</span></p>
+      <p><i class="fas fa-envelope"></i> <span id="footerEmail">avukilerooms@gmail.com</span></p>
+    </div>
+  </div>
+  <div class="bottom">&copy; 2026 Soweto & Roodepoort Properties. All rights reserved.</div>
+</footer>
+
+<!-- RENT MODAL -->
+<div class="modal-overlay" id="rentModal" style="align-items: flex-end;">
+  <div class="modal" style="max-width: 500px; border-radius: 16px 16px 0 0; text-align: center;">
+    <button class="close-btn" style="background: #f0f0f0; color: #333;" onclick="closeRentModal()">✕</button>
+    <h2 style="font-family: 'Playfair Display'; margin-bottom: 10px;">Rent a Property</h2>
+    <p style="color: #666; margin-bottom: 20px;">Are you a landlord looking to list, or a tenant looking for a place?</p>
+    <a href="list.html?type=rent" style="display:block; padding: 15px; background: #0d1f12; color: #fff; border-radius: 8px; font-weight: 600; margin-bottom: 10px; text-decoration: none;">🏠 I am a Landlord</a>
+    <a href="rent.html" style="display:block; padding: 15px; background: #f0f7f4; color: #0d1f12; border: 1px solid #ddd; border-radius: 8px; font-weight: 600; text-decoration: none;">🔍 I am a Tenant</a>
+  </div>
+</div>
+
+<!-- PROPERTY DETAIL MODAL (GALLERY) -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal">
+    <button class="close-btn" onclick="closeDetails()">✕</button>
+    <div id="detailBody">Loading...</div>
+  </div>
+</div>
+
+<script>
+  let allProps = [];
+
+  async function fetchSettings() {
+    const res = await fetch('/api/settings');
+    const s = await res.json();
+    if (s.logo) {
+      const img = document.getElementById('siteLogo');
+      img.src = s.logo; img.style.display = 'block';
+    }
+    document.getElementById('footerWhatsapp').innerText = s.whatsapp;
+    document.getElementById('footerEmail').innerText = s.email;
+  }
+
+  async function fetchFeatured() {
+    try {
+      const res = await fetch('/api/properties');
+      if (!res.ok) throw new Error('Server error');
+      allProps = await res.json();
+      
+      const grid = document.getElementById('featuredGrid');
+      if (allProps.length === 0) {
+        grid.innerHTML = '<p class="empty">No properties available right now. Check back soon!</p>';
+        return;
+      }
+
+      // Show 8 latest properties
+      const featured = allProps.slice(0, 8);
+
+      grid.innerHTML = featured.map((p, index) => `
+        <div class="property-card" onclick="openDetails(${index})">
+          <div class="img-box">
+            <img src="${p.images && p.images.length > 0 ? p.images[0] : 'https://via.placeholder.com/350x220?text=No+Image'}" alt="Property">
+            ${p.availableDate ? `<div class="badge">AVAIL: ${formatDate(p.availableDate)}</div>` : ''}
+          </div>
+          <div class="body">
+            <div class="price">R ${p.price} ${p.type === 'Rent' ? '<span style="font-size:14px;color:#666;font-weight:400;">/ month</span>' : ''}</div>
+            <div class="title">${p.suburb} ${p.beds} Bedroom ${p.propType}</div>
+            <div class="details-row">
+              <span><i class="fas fa-bed"></i> ${p.beds}</span>
+              <span><i class="fas fa-bath"></i> ${p.baths}</span>
+              <span><i class="fas fa-car"></i> ${p.parking}</span>
+              ${p.erf ? `<span><i class="fas fa-vector-square"></i> ${p.erf} m²</span>` : ''}
+            </div>
+            <div class="addr"><i class="fas fa-map-marker-alt"></i> ${p.streetAddress || p.suburb}, ${p.region}</div>
+          </div>
+        </div>
+      `).join('');
+    } catch (err) {
+      document.getElementById('featuredGrid').innerHTML = '<p class="empty">Error loading properties.</p>';
+    }
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-ZA', { day: '2-digit', month: 'short' }).toUpperCase();
+  }
+
+  // GALLERY & DETAILS LOGIC
+  let currentProp = null;
+  let currentImgIndex = 0;
+
+  function openDetails(index) {
+    currentProp = allProps[index];
+    currentImgIndex = 0;
+    document.getElementById('detailModal').classList.add('show');
+    renderDetails();
+  }
+
+  function closeDetails() {
+    document.getElementById('detailModal').classList.remove('show');
+    document.getElementById('detailBody').innerHTML = 'Loading...';
+  }
+
+  function renderDetails() {
+    const p = currentProp;
+    const allMedia = [];
+    if (p.images && p.images.length > 0) {
+      p.images.forEach(img => allMedia.push({ type: 'image', src: img }));
+    }
+    if (p.video) {
+      allMedia.push({ type: 'video', src: p.video });
+    }
+
+    const mainMedia = allMedia[currentImgIndex] || allMedia[0];
+    let mainHtml = '';
+    if (mainMedia) {
+      if (mainMedia.type === 'image') {
+        mainHtml = `<img src="${mainMedia.src}" alt="Property Image">`;
+      } else {
+        mainHtml = `<video src="${mainMedia.src}" controls autoplay></video>`;
+      }
+    } else {
+      mainHtml = `<img src="https://via.placeholder.com/800x400?text=No+Media" alt="No Media">`;
+    }
+
+    const thumbsHtml = allMedia.map((m, i) => `
+      <div class="thumb ${i === currentImgIndex ? 'active' : ''}" onclick="changeMedia(${i})">
+        ${m.type === 'image' ? `<img src="${m.src}">` : `<video src="${m.src}"></video>`}
+      </div>
+    `).join('');
+
+    document.getElementById('detailBody').innerHTML = `
+      <div class="gallery-main">${mainHtml}</div>
+      <div class="gallery-thumbs">${thumbsHtml}</div>
+      
+      <div class="detail-title">${p.title}</div>
+      <div class="detail-price">R ${p.price} ${p.type === 'Rent' ? '/ month' : ''}</div>
+      
+      <div class="detail-info">
+        <span><i class="fas fa-bed"></i> ${p.beds} Beds</span>
+        <span><i class="fas fa-bath"></i> ${p.baths} Baths</span>
+        <span><i class="fas fa-car"></i> ${p.parking} Parking</span>
+        <span><i class="fas fa-home"></i> ${p.propType}</span>
+      </div>
+      
+      <div class="detail-info">
+        <span><i class="fas fa-paw"></i> Pets: ${p.petFriendly}</span>
+        <span><i class="fas fa-child"></i> Kids: ${p.childFriendly}</span>
+        ${p.deposit ? `<span><i class="fas fa-money-bill-wave"></i> Deposit: R${p.deposit}</span>` : ''}
+      </div>
+
+      <div class="detail-desc">${p.description || 'No description provided.'}</div>
+      
+      <a href="https://wa.me/27${p.whatsapp}" target="_blank" class="btn-contact">
+        <i class="fab fa-whatsapp"></i> Contact Landlord / Seller
+      </a>
+    `;
+  }
+
+  function changeMedia(index) {
+    currentImgIndex = index;
+    renderDetails();
+  }
+
+  function openRentModal() { document.getElementById('rentModal').classList.add('show'); }
+  function closeRentModal() { document.getElementById('rentModal').classList.remove('show'); }
+
+  fetchSettings();
+  fetchFeatured();
+</script>
+</body>
+</html>
