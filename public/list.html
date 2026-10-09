@@ -162,13 +162,15 @@
 
       <div class="form-group">
         <label>Upload Pictures (Up to 10) *</label>
-        <input type="file" name="images" accept="image/*" capture="environment" multiple required>
-        <div class="file-info">You can take photos directly with your phone or select from gallery.</div>
+        <!-- Removed capture="environment" so phone asks to choose from Gallery or Camera -->
+        <input type="file" name="images" accept="image/*" id="imageInput" multiple required>
+        <div class="file-info">Take photos directly with your phone OR select from your gallery.</div>
       </div>
 
       <div class="form-group">
         <label>Upload Video Walkthrough (Optional)</label>
-        <input type="file" name="video" accept="video/*" capture="environment">
+        <!-- Removed capture="environment" so phone asks to choose from Gallery or Camera -->
+        <input type="file" name="video" accept="video/*" id="videoInput">
       </div>
 
       <button type="submit" class="btn-submit">✅ Submit for Approval</button>
@@ -240,6 +242,14 @@
       });
     }
   }
+
+  // Enforce 10 image upload limit
+  document.getElementById('imageInput').addEventListener('change', function() {
+    if (this.files.length > 10) {
+      alert('You can only upload a maximum of 10 pictures. Please select fewer files.');
+      this.value = ''; // Clear the selection
+    }
+  });
 
   // Handle Form Submission
   document.getElementById('propertyForm').addEventListener('submit', async (e) => {
