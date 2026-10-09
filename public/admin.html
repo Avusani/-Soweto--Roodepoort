@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Poppins', sans-serif; background: #f0f2f5; color: #333; }
+    .login-w { height: 100vh; display: flex; align-items: center; justify-content: center; background: #0d1f12; padding: 20px; }
+    .login-b { background: #fff; padding: 30px; border-radius: 12px; width: 100%; max-width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .login-b h2 { text-align: center; margin-bottom: 20px; }
+    .login-b input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; }
+    .login-b button { width: 100%; padding: 12px; background: #4caf8a; color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    .err { color: red; text-align: center; display: none; margin-bottom: 10px; }
+
+    .header { background: #0d1f12; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+    .header h1 { font-size: 18px; }
+    .nav { display: flex; gap: 15px; }
+    .nav a { color: rgba(255,255,255,0.8); cursor: pointer; font-size: 14px; }
+    .btn-out { background: #b8493b; color: #fff; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; }
+
+    .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    
+    .prop-row { display: flex; flex-direction: column; gap: 15px; padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 15px; }
+    .prop-info h4 { color: #0d1f12; margin-bottom: 5px; font-size: 16px; }
+    .prop-info p { font-size: 13px; color: #666; }
+    .prop-images { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; }
+    .prop-images img, .prop-images video { width: 100px; height: 80px; object-fit: cover; border-radius: 6px; }
+    .badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-left: 5px; }
+    .badge.pendingapproval { background: #fff3cd; color: #856404; }
+    .badge.approved { background: #d4edda; color: #155724; }
+    .badge.declined { background: #f8d7da; color: #721c24; }
+
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-sm { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: #fff; flex: 1; text-align: center; }
+    .btn-appr { background: #4caf8a; }
+    .btn-dec { background: #b8493b; }
+    .btn-del { background: #6c757d; }
+    .sel-plan { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 10px; }
+
+    .set-g { margin-bottom: 15px; }
+    .set-g label { display: block; font-weight: 500; margin-bottom: 5px; font-size: 14px; }
+    .set-g input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+    .btn-save { background: #0d1f12; color: #fff; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; }
+
+    @media (min-width: 768px) {
+      .prop-row { flex-direction: row; align-items: center; justify-content: space-between; }
+      .btn-save { width: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-w" id="loginScreen">
+  <div class="login-b">
+    <h2>🔐 Admin Login</h2>
+    <div class="err" id="loginError">Invalid credentials!</div>
+    <input type="text" id="loginUser" placeholder="Username" value="admin">
+    <input type="password" id="loginPass" placeholder="Password" value="admin123">
+    <button onclick="login()">Login</button>
+  </div>
+</div>
+
+<div id="dashboard" style="display:none;">
+  <header class="header">
+    <h1>🏠 Admin Dashboard</h1>
+    <nav class="nav">
+      <a onclick="showTab('pending')">Pending</a>
+      <a onclick="showTab('active')">Active</a>
+      <a onclick="showTab('settings')">Settings</a>
+    </nav>
+    <button class="btn-out" onclick="logout()">Logout</button>
+  </header>
+
+  <div class="container">
+    <div id="pendingTab">
+      <h2 style="margin: 20px 0 15px; font-size: 20px;">Pending Approvals</h2>
+      <div id="pendingList"><p>Loading...</p></div>
+    </div>
+
+    <div id="activeTab" style="display:none;">
+      <h2 style="margin: 20px 0 15px; font-size: 20px;">Active Listings</h2>
+      <div id="activeList"><p>Loading...</p></div>
+    </div>
+
+    <div id="settingsTab" style="display:none;">
+      <h2 style="margin: 20px 0 15px; font-size: 20px;">Website Settings</h2>
+      
+      <div class="card">
+        <h3 style="margin-bottom:15px;">Website Logo</h3>
+        <div class="set-g">
+          <label>Upload Logo</label>
+          <input type="file" id="logoFile" accept="image/*">
+        </div>
+        <button class="btn-save" onclick="uploadLogo()">Upload Logo</button>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:15px;">Contact Info</h3>
+        <div class="set-g"><label>WhatsApp</label><input type="text" id="settingWhatsapp" placeholder="0685353186"></div>
+        <div class="set-g"><label>Email</label><input type="email" id="settingEmail" placeholder="avukilerooms@gmail.com"></div>
+        <button class="btn-save" onclick="saveSettings()">Save Changes</button>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:15px;">Admin Credentials</h3>
+        <div class="set-g"><label>Change Username</label><input type="text" id="newUsername" placeholder="New Username"></div>
+        <div class="set-g"><label>Change Password</label><input type="password" id="newPassword" placeholder="New Password"></div>
+        <button class="btn-save" onclick="saveCredentials()">Update Login</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  async function login() {
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: document.getElementById('loginUser').value, pass: document.getElementById('loginPass').value })
+      });
+      if (res.ok) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        sessionStorage.setItem('adminLoggedIn', 'true');
+        loadProperties(); loadSettings();
+      } else { document.getElementById('loginError').style.display = 'block'; }
+    } catch (err) { alert('Network error. Is server running?'); }
+  }
+  function logout() { sessionStorage.removeItem('adminLoggedIn'); location.reload(); }
+  if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    loadProperties(); loadSettings();
+  }
+  function showTab(tab) {
+    document.querySelectorAll('#pendingTab, #activeTab, #settingsTab').forEach(t => t.style.display = 'none');
+    document.getElementById(tab + 'Tab').style.display = 'block';
+    if (tab === 'pending' || tab === 'active') loadProperties();
+  }
+
+  async function loadProperties() {
+    try {
+      const res = await fetch('/api/admin/properties');
+      const properties = await res.json();
+      const pList = document.getElementById('pendingList');
+      const aList = document.getElementById('activeList');
+      pList.innerHTML = ''; aList.innerHTML = '';
+
+      if (properties.length === 0) {
+        pList.innerHTML = '<p>No properties submitted yet.</p>';
+        aList.innerHTML = '<p>No active listings yet.</p>';
+        return;
+      }
+
+      properties.forEach(prop => {
+        const div = document.createElement('div');
+        div.className = 'prop-row';
+        let badgeClass = prop.status.toLowerCase().replace(/\s/g, '');
+        let imgs = prop.images && prop.images.length > 0 ? `<div class="prop-images">${prop.images.map(i => `<img src="${i}">`).join('')}</div>` : '';
+        if(prop.video) imgs += `<div class="prop-images"><video src="${prop.video}" controls></video></div>`;
+        
+        let actions = '';
+        if (prop.status === 'Pending Approval') {
+          actions = `
+            <select class="sel-plan" onchange="setPlan(${prop.id}, this.value)">
+              <option value="">Select Plan...</option>
+              <option value="Once-off (R50)" ${prop.plan === 'Once-off (R50)' ? 'selected' : ''}>Once-off (R50)</option>
+              <option value="Premium (R200/m)" ${prop.plan === 'Premium (R200/m)' ? 'selected' : ''}>Premium (R200/m)</option>
+              <option value="Agency Service" ${prop.plan === 'Agency Service' ? 'selected' : ''}>Agency Service</option>
+            </select>
+            <div class="actions">
+              <button class="btn-sm btn-appr" onclick="updateProp(${prop.id}, {status: 'Approved'})">Approve</button>
+              <button class="btn-sm btn-dec" onclick="updateProp(${prop.id}, {status: 'Declined'})">Decline</button>
+            </div>`;
+          div.innerHTML = `<div style="flex:1;"><div class="prop-info"><h4>${prop.title} <span class="badge ${badgeClass}">${prop.status}</span></h4><p>${prop.streetAddress || ''} - ${prop.suburb}, ${prop.region} - ${prop.type} - R${prop.price}</p></div>${imgs}</div><div style="flex:1;">${actions}</div>`;
+          pList.appendChild(div);
+        } else if (prop.status === 'Approved' || prop.status === 'Taken') {
+          actions = `<div class="actions"><button class="btn-sm btn-dec" onclick="updateProp(${prop.id}, {status: 'Taken'})">Mark Taken</button><button class="btn-sm btn-del" onclick="deleteProp(${prop.id})">Delete</button></div>`;
+          div.innerHTML = `<div style="flex:1;"><div class="prop-info"><h4>${prop.title} <span class="badge ${badgeClass}">${prop.status}</span></h4><p>${prop.streetAddress || ''} - ${prop.suburb}, ${prop.region} - ${prop.type} - R${prop.price}</p></div>${imgs}</div><div style="flex:1;">${actions}</div>`;
+          aList.appendChild(div);
+        }
+      });
+    } catch (err) { console.error(err); }
+  }
+  async function setPlan(id, plan) { await fetch(`/api/admin/properties/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan }) }); }
+  async function updateProp(id, data) { await fetch(`/api/admin/properties/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); loadProperties(); }
+  async function deleteProp(id) { if(confirm('Delete permanently?')) { await fetch(`/api/admin/properties/${id}`, { method: 'DELETE' }); loadProperties(); } }
+
+  async function loadSettings() {
+    try {
+      const res = await fetch('/api/settings');
+      const s = await res.json();
+      document.getElementById('settingWhatsapp').value = s.whatsapp;
+      document.getElementById('settingEmail').value = s.email;
+    } catch (err) {}
+  }
+  async function uploadLogo() {
+    const file = document.getElementById('logoFile').files[0];
+    if (!file) return alert('Select file first');
+    const fd = new FormData(); fd.append('logo', file);
+    await fetch('/api/admin/upload-logo', { method: 'POST', body: fd });
+    alert('Logo uploaded!');
+  }
+  async function saveSettings() {
+    await fetch('/api/admin/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ whatsapp: document.getElementById('settingWhatsapp').value, email: document.getElementById('settingEmail').value }) });
+    alert('Settings saved!');
+  }
+  async function saveCredentials() {
+    const u = document.getElementById('newUsername').value; const p = document.getElementById('newPassword').value;
+    if (u && p) { await fetch('/api/admin/creds', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: u, pass: p }) }); alert('Updated! Login again.'); logout(); }
+  }
+</script>
+</body>
+</html>
