@@ -46,26 +46,32 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', (req, res, next) => { res.set('X-Content-Type-Options', 'nosniff'); next(); }, express.static(UPLOAD_DIR));
 
 const DB_FILE = path.join(DATA_DIR, 'db.json');
+// Added Website Content fields
+const DEFAULT_SETTINGS = {
+  whatsapp: '0685353186',
+  email: 'avukilerooms@gmail.com',
+  logo: '',
+  aboutUs: 'Working hand in hand with Vusani Ikhaya Properties to make property rentals and sales easy.',
+  terms: '1. All listings must be verified. 2. No fraudulent activity allowed. 3. Fees must be paid before approval.',
+  privacy: 'We respect your privacy and do not share your personal information with third parties.'
+};
 if (!fs.existsSync(DB_FILE)) {
   fs.writeFileSync(DB_FILE, JSON.stringify({
     properties: [],
     alerts: [],
-    // Added Website Content fields
-    settings: {
-      whatsapp: '0685353186',
-      email: 'avukilerooms@gmail.com',
-      logo: '',
-      aboutUs: 'Working hand in hand with Vusani Ikhaya Properties to make property rentals and sales easy.',
-      terms: '1. All listings must be verified. 2. No fraudulent activity allowed. 3. Fees must be paid before approval.',
-      privacy: 'We respect your privacy and do not share your personal information with third parties.'
-    },
+    settings: DEFAULT_SETTINGS,
     creds: { user: 'admin', pass: 'admin123' }
   }, null, 2));
 }
 
+// A db.json made before a field existed does not have it: the live site's was
+// created before About Us, Terms and Privacy were added, so those pop-ups said
+// "No content available". A missing field gets its default; one the admin has
+// saved, even as empty, is left alone.
 function readDB() {
   const db = JSON.parse(fs.readFileSync(DB_FILE));
   if (!Array.isArray(db.alerts)) db.alerts = [];
+  db.settings = { ...DEFAULT_SETTINGS, ...(db.settings || {}) };
   return db;
 }
 function writeDB(data) { fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2)); }
@@ -236,11 +242,26 @@ app.get('/api/admin/stats', (req, res) => {
   res.json(stats);
 });
 
+// What a visitor may be told about a listing. Hiding something on the page is
+// not enough: anything sent here can be read by anyone who opens the page's
+// data, so what must stay private is left out of the answer itself.
+// - The street address and the landlord's name are never sent. The pages show
+//   the suburb, and the address is given over WhatsApp, to someone who asked.
+// - The landlord's WhatsApp number is sent only once a fee plan is set, which
+//   is when the page shows "Contact Landlord / Seller". Until then enquiries
+//   go to the admin's number, so there is no reason for the page to hold it.
+// The admin still sees everything, through /api/admin/properties.
+function publicListing(p) {
+  const { whatsapp, name, streetAddress, ...listing } = p;
+  const paid = Boolean(p.feePlan && p.feePlan !== 'None');
+  return paid ? { ...listing, whatsapp } : listing;
+}
+
 app.get('/api/properties', (req, res) => {
   const db = readDB();
   let props = db.properties.filter(p => p.status === 'Approved');
   if (req.query.type) props = props.filter(p => p.type === req.query.type);
-  res.json(props);
+  res.json(props.map(publicListing));
 });
 
 app.post('/api/properties', (req, res, next) => {
