@@ -82,6 +82,7 @@
       <div class="form-group">
         <label>Street Address (Optional but recommended)</label>
         <input type="text" name="streetAddress" placeholder="123 Main Street">
+        <div class="file-info">Not shown on the website. Only our team sees it. People see the suburb.</div>
       </div>
 
       <div class="form-group">
@@ -276,7 +277,8 @@
         alert('Property submitted successfully! Pending Admin approval.');
         window.location.href = 'index.html';
       } else {
-        alert('Error submitting property.');
+        const data = await res.json().catch(() => ({}));
+        alert(data.message || 'Error submitting property.');
       }
     } catch (err) {
       alert('Network error.');
