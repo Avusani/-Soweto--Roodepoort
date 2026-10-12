@@ -3,7 +3,6 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const multer = require('multer');
-const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -111,22 +110,29 @@ let mailer = null;
 
 function notifyAdmin(req, subject, lines) {
   if (!emailOn()) return;
-  if (!mailer) {
-    const port = Number(process.env.SMTP_PORT || 465);
-    mailer = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port,
-      secure: port === 465,
-      auth: { user: SMTP_USER, pass: SMTP_PASS }
-    });
-  }
   const oneLine = s => String(s).replace(/[\r\n]+/g, ' ').trim();
-  mailer.sendMail({
-    from: `"Soweto & Roodepoort Properties" <${SMTP_USER}>`,
-    to: notifyTo(),
-    subject: oneLine(subject),
-    text: [...lines, '', `Open the admin: ${siteUrl(req)}/admin.html`].join('\n')
-  }).catch(err => console.error(`Admin email failed (${oneLine(subject)}): ${err.message}`));
+  try {
+    if (!mailer) {
+      // Loaded here, not at the top of the file: the site must start and run
+      // whether or not email is switched on, or the mail library can load.
+      const nodemailer = require('nodemailer');
+      const port = Number(process.env.SMTP_PORT || 465);
+      mailer = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port,
+        secure: port === 465,
+        auth: { user: SMTP_USER, pass: SMTP_PASS }
+      });
+    }
+    mailer.sendMail({
+      from: `"Soweto & Roodepoort Properties" <${SMTP_USER}>`,
+      to: notifyTo(),
+      subject: oneLine(subject),
+      text: [...lines, '', `Open the admin: ${siteUrl(req)}/admin.html`].join('\n')
+    }).catch(err => console.error(`Admin email failed (${oneLine(subject)}): ${err.message}`));
+  } catch (err) {
+    console.error(`Admin email failed (${oneLine(subject)}): ${err.message}`);
+  }
 }
 
 // A small in-memory limit per client address. Enough to stop someone guessing
